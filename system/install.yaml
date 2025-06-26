@@ -1,0 +1,8 @@
+- hosts: local
+  # gather_facts: false
+  collections:
+    - community.kubernetes
+    - kubernetes.core
+
+  roles:
+    - role: platform

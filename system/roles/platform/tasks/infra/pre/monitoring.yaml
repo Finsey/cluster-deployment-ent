@@ -1,0 +1,9 @@
+# - name: Create Grafana TLS certificate
+#   include_tasks: ../tasks/cert-manager/generate-cert.yaml
+#   vars:
+#     cert_name: grafana-tls
+#     namespace: monitoring
+#     issuer_name: domain-ca-issuer
+#     secret_name: grafana-tls
+#     dns_names:
+#       - "grafana.{{ domain_name }}"

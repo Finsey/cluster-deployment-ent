@@ -1,0 +1,49 @@
+---
+- name: Include prerequisites
+  ansible.builtin.include_tasks:
+    file: prerequisites.yaml
+
+- name: Create values
+  ansible.builtin.set_fact:
+    helm_values: "{{ lookup('file', '{{ playbook_dir }}/templates/values/' + item.name + '.yaml.j2') | from_yaml }}"
+
+# - name: Check if pre-configuration file exists
+#   ansible.builtin.stat:
+#     path: "../tasks/infra/pre/{{ item.name }}.yaml"
+#   register: pre_stat
+
+# - name: Apply pre-configurations ({{ item.name }})
+#   ansible.builtin.include_tasks:
+#     file: "../tasks/infra/pre/{{ item.name }}.yaml"
+#   when: pre_stat.stat.exists
+
+- name: Include pre-configurations only if file exists
+  ansible.builtin.include_tasks:
+    file: "{{ file }}"
+  loop_control:
+    loop_var: file
+  with_first_found:
+    - files:
+      - "../tasks/infra/pre/{{ item.name }}.yaml"
+      skip: true
+
+- name: Install release ({{ item.name }})
+  community.kubernetes.helm:
+    name: "{{ item.name }}"
+    chart_ref: "{{ item.chart_ref }}"
+    chart_version: "{{ item.version }}"
+    release_namespace: "{{ item.namespace }}"
+    create_namespace: false
+    chart_repo_url: "{{ item.repo_url }}"
+    values: "{{ helm_values }}"
+    wait: true
+
+- name: Include post-configurations only if file exists
+  ansible.builtin.include_tasks:
+    file: "{{ file }}"
+  loop_control:
+    loop_var: file
+  with_first_found:
+    - files:
+      - "../tasks/infra/post/{{ item.name }}.yaml"
+      skip: true

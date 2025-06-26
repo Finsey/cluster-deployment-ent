@@ -1,0 +1,172 @@
+---
+- name: Wait until pods are 'Running'
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: vault
+    label_selectors:
+     - app.kubernetes.io/instance = vault
+  register: pod_list
+  until: pod_list|json_query('resources[*].status.phase')|unique == ["Running"]
+  retries: 10
+  delay: 10
+
+- name: Create unseal/root key directory
+  file:
+    path: "{{ unseal_dir_output }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Verify whether Vault has been initialised
+  kubernetes.core.k8s_exec:
+    namespace: vault
+    pod: vault-0
+    command: vault status -format=json
+  register: vault_status_raw
+  failed_when: false
+  changed_when: false
+
+- name: Parse Vault status JSON string to dictionary
+  set_fact:
+    vault_status: "{{ vault_status_raw.stdout | from_json }}"
+
+- name: Transfer JSON to formatted list
+  set_fact:
+    vault_status_formatted: "{{ vault_status.results | json_query('[].{name: item, guestState: instance.guest.guestState}') }}"
+
+- name: Initialise Vault
+  kubernetes.core.k8s_exec:
+    namespace: vault
+    pod: vault-0
+    command: vault operator init -format=json -key-shares=5 -key-threshold=3
+  register: vault_init
+  changed_when: "'keys' in vault_init.stdout"
+  run_once: true
+  when: not vault_status.initialized
+
+- name: Extract unseal keys list
+  set_fact:
+    vault_init_parsed: "{{ vault_init.stdout | from_json }}"
+  when: not vault_status.initialized
+
+- name: Write unseal keys to files
+  copy:
+    dest: "{{ unseal_dir_output }}/unseal_key_{{ item.0 }}"
+    content: "{{ item.1 }}"
+  with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
+  delegate_to: localhost
+  when: not vault_status.initialized
+
+- name: Write root token to file
+  copy:
+    content: "{{ vault_init_parsed.root_token }}"
+    dest: "{{ unseal_dir_output }}/rootkey"
+  delegate_to: localhost
+  when: not vault_status.initialized
+
+- name: Build list of Vault pod names
+  set_fact:
+    pod_names: "{{ pod_list.resources | map(attribute='metadata.name') | list }}"
+
+- name: Load all unseal keys into a list
+  set_fact:
+    unseal_keys: "{{ (unseal_keys | default([])) + [ lookup('file', file_item).strip() ] }}"
+  loop: "{{ lookup('fileglob', unseal_dir_output + '/unseal_key_*', wantlist=True) }}"
+  loop_control:
+    loop_var: file_item
+  delegate_to: localhost
+
+- name: Load root token as a variable
+  set_fact:
+    root_token: "{{ lookup('file', unseal_dir_output + '/rootkey') }}"
+  delegate_to: localhost
+
+- name: Display unseal data from file (debug)
+  ansible.builtin.debug:
+    msg: "{{ unseal_keys }}"
+
+- name: Unseal first Vault pod with each unseal key
+  kubernetes.core.k8s_exec:
+    namespace: vault
+    pod: vault-0
+    container: vault
+    command: vault operator unseal "{{ item }}"
+  loop: "{{ unseal_keys }}"
+  register: unseal_results
+  retries: 10
+  delay: 2
+
+- name: Join remaining Vault pods to the Raft cluster
+  kubernetes.core.k8s_exec:
+    namespace: vault
+    pod: "{{ item }}"
+    container: vault
+    command: vault operator raft join http://vault-0.vault-internal:8200
+  loop: "{{ pod_names[1:] }}"
+  register: unseal_results
+  retries: 6
+  delay: 3
+
+- name: Unseal remaining Vault pods with each key
+  kubernetes.core.k8s_exec:
+    namespace: vault
+    pod: "{{ combo[0] }}"
+    container: vault
+    command: vault operator unseal "{{ combo[1] }}"
+  loop: "{{ pod_names[1:] | product(unseal_keys) | list }}"
+  loop_control:
+    loop_var: combo
+    label: "pod={{ combo[0] }} key={{ combo[1] }}"
+  register: unseal_remaining_results
+
+# - name: Unseal remaining Vault pods with each key
+#   kubernetes.core.k8s_exec:
+#     namespace: vault
+#     pod: "{{ item.0 }}"
+#     container: vault
+#     command:
+#       - vault
+#       - operator
+#       - unseal
+#       - "{{ item.1 }}"
+#   loop: "{{ pod_names[1:] | product(unseal_keys) | list }}"
+#   loop_control:
+#     label: "pod={{ item.0 }} key={{ item.1 }}"
+#   retries: 5
+#   delay: 2
+
+# - name: Enable the LDAP auth backend in Vault
+#   kubernetes.core.k8s_exec:
+#     namespace: vault
+#     pod: vault-0
+#     container: vault
+#     command: vault auth enable ldap
+#   environment:
+#     VAULT_TOKEN: "{{ root_token }}"
+
+# - name: Configure LDAP connection
+#   kubernetes.core.k8s_exec:
+#     namespace: vault
+#     pod: vault-0
+#     container: vault
+#     command: vault write auth/ldap/config url="ldap://openldap.vault.svc.cluster.local" userdn="ou=Users,dc=example,dc=com" groupdn="ou=Groups,dc=example,dc=com" binddn="cn=admin,dc=example,dc=com" bindpass="{{ vault_ldap_bind_password }}" starttls=false
+#   environment:
+#     VAULT_TOKEN: "{{ root_token }}"
+
+- name: Enable Vault PKI engine
+  kubernetes.core.k8s_exec:
+    namespace: vault
+    pod: vault-0
+    container: vault
+    command: "vault secrets enable pki -token={{ root_token }}"
+
+- name: Configure Vault CA and CRL URLs
+  kubernetes.core.k8s_exec:
+    namespace: vault
+    pod: vault-0
+    container: vault
+    command: vault write pki/config/urls issuing_certificates="https://vault.example.com/v1/pki/ca" crl_distribution_points="https://vault.example.com/v1/pki/crl" -token={{ root_token }}
+
+# Installation of PKI things
+# Installation of other things
+# Production like seal and unseal

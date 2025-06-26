@@ -1,0 +1,5 @@
+---
+- name: Read and base64-encode root certificate and key
+  set_fact:
+    rca_crt_b64: "{{ lookup('file', rca_crt) }}"
+    rca_key_b64: "{{ lookup('file', rca_key) }}"

@@ -1,0 +1,41 @@
+- name: Check Helm installed locally
+  ansible.builtin.shell: hash helm
+  delegate_to: 127.0.0.1
+  run_once: true
+  changed_when: false
+  args:
+    executable: "/bin/bash"
+
+- name: Set action to install via Helm
+  ansible.builtin.set_fact:
+    deploy_action: "install"
+  delegate_to: 127.0.0.1
+  run_once: true
+  when:
+    - action is defined
+    - '"install" in action'
+
+# - name: Set action to upgrade via Helm
+#   ansible.builtin.set_fact:
+#     deploy_action: "upgrade"
+#   delegate_to: 127.0.0.1
+#   run_once: true
+#   when:
+#     - action is defined
+#     - '"upgrade" in action'
+
+# - name: Set action to delete via Helm
+#   ansible.builtin.set_fact:
+#     deploy_action: "delete"
+#   delegate_to: 127.0.0.1
+#   run_once: true
+#   when:
+#     - action is defined
+#     - '"delete" in action'
+
+- name: Install Charts (and apply configurations)
+  ansible.builtin.include_tasks:
+    file: "{{ deploy_action | lower }}.yaml"
+  loop: "{{ helm_charts }}"
+  loop_control:
+    loop_var: item
