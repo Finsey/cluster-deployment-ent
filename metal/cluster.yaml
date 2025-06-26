@@ -4,8 +4,5 @@
     - prerequisites
     - rke2
     - automatic_upgrade
-
-- name: Install Kubernetes addons
-  hosts: localhost
-  roles:
-    - cilium
+  collections:
+    - community.docker

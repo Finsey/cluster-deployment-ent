@@ -2,7 +2,13 @@
 
 export KUBECONFIG = $(shell pwd)/../metal/kubeconfig.yaml
 
-.PHONY: install
+# .PHONY: install
+default: deps install
+
+deps:
+	ansible-galaxy collection install \
+		-r requirements.yaml
+
 install:
 	ansible-playbook \
 		install.yaml
