@@ -5,7 +5,7 @@ metal:
   children:
     masters:
       hosts:
-        mn0: {ansible_host: 192.168.1.110, mac: '00:23:24:d1:f5:69', disk: sda, network_interface: eno1}
+        mn0: {ansible_host: 192.168.1.110, mac: 'c0:7c:d1:fe:3c:6b', disk: sda, network_interface: eno1}
         # mn1: {ansible_host: 192.168.1.111, mac: '00:23:24:d1:f3:f0', disk: sda, network_interface: eno1}
         # mn2: {ansible_host: 192.168.1.112, mac: '00:23:24:e7:04:60', disk: sda, network_interface: eno1}
     # workers:

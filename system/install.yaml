@@ -5,4 +5,5 @@
     - kubernetes.core
 
   roles:
-    - role: platform
+    - libaries
+    - platform

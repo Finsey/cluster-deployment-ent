@@ -1,3 +1,8 @@
+- name: Install Python libraries
+  hosts: localhost
+  roles:
+    - libraries
+
 - name: Start PXE server
   hosts: localhost
   roles:
