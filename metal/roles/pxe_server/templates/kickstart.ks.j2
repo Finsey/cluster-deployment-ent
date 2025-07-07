@@ -7,12 +7,12 @@ text
 keyboard --xlayouts='gb'
 lang en_US.UTF-8
 
-# Network (static)
-network  --bootproto=static \
+# Network (dhcp)
+network  --bootproto=dhcp \
          --device={{ hostvars[item]['network_interface'] }} \
          --ip={{ hostvars[item]['ansible_host'] }} \
          --netmask={{ ansible_default_ipv4.netmask }} \
-         --gateway={{ ansible_default_ipv4.gateway }} \
+         --gateway={{ hostvars[item]['gateway'] }} \
          --nameserver={{ dns_server }} \
          --hostname={{ hostvars[item]['inventory_hostname'] }} \
          --activate
