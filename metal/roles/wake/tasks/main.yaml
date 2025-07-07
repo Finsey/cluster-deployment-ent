@@ -3,6 +3,12 @@
     mac: "{{ mac }}"
   delegate_to: localhost
 
+- name: Sennd Wake-on-LAN magic packets (via ether-wake)
+  ansible.builtin.command:
+    cmd: ether-wake "{{ mac }}"
+  delegate_to: localhost
+  changed_when: false
+
 - name: Wait for the machines to come online
   ansible.builtin.wait_for_connection:
     timeout: 600
