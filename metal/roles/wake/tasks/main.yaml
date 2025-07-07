@@ -3,7 +3,7 @@
     mac: "{{ mac }}"
   delegate_to: localhost
 
-- name: Sennd Wake-on-LAN magic packets (via ether-wake)
+- name: Send Wake-on-LAN magic packets (via ether-wake)
   ansible.builtin.command:
     cmd: ether-wake "{{ mac }}"
   delegate_to: localhost
