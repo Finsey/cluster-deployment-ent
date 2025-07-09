@@ -1,7 +1,11 @@
 all:
   vars:
-    control_plane_endpoint: 192.168.3.100
+    host_address: 192.168.3.10
     gateway: 192.168.3.254
+    host_network: 192.168.3.0/24
+    broadcast: 192.168.3.255
+    netmask: 255.255.255.0
+    interface: "eth0"
 metal:
   children:
     masters:

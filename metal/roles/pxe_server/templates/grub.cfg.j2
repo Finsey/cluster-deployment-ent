@@ -4,5 +4,6 @@ menuentry '{{ iso_url | basename | splitext | first }} (PXE)' {
     linux vmlinuz \
         ip=dhcp \
         inst.ks=http://{{ ansible_default_ipv4.address }}/init-config/${net_default_mac}.ks
+        inst.repo=http://{{ ansible_default_ipv4.address }}/os
     initrd /os/images/pxeboot/initrd.img
 }
