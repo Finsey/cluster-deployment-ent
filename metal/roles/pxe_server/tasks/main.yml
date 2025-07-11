@@ -41,7 +41,7 @@
 
 - name: Find all directories under {{ role_path }}/files/
   ansible.builtin.find:
-    paths: "{{ role_path }}/files/data/"
+    paths: "{{ role_path }}/files/"
     file_type: directory
     recurse: true
   register: os_dirs
@@ -54,7 +54,7 @@
 
 - name: Find all files under {{ role_path }}/files/
   ansible.builtin.find:
-    paths: "{{ role_path }}/files/data/"
+    paths: "{{ role_path }}/files/"
     file_type: file
     recurse: true
   register: os_files
