@@ -1,71 +1,67 @@
 #version=RHEL8
-# Use text mode
-install
+
+# Do not use graphical install
 text
 
-# Keyboard and language
-keyboard --xlayouts='gb'
+# Keyboard layouts
+keyboard --xlayouts='us'
+# System language
 lang en_US.UTF-8
 
-# Network (dhcp)
-network  --bootproto=dhcp \
-         --device={{ hostvars[item]['network_interface'] }} \
-         --ip={{ hostvars[item]['ansible_host'] }} \
-         --netmask={{ ansible_default_ipv4.netmask }} \
-         --gateway={{ hostvars[item]['gateway'] }} \
-         --nameserver={{ dns_server }} \
-         --hostname={{ hostvars[item]['inventory_hostname'] }} \
-         --activate
-
-# Partitioning: clear and use only the given disk
+# Partition clearing information
 clearpart --all --drives={{ hostvars[item]['disk'] }}
+# Partitioning
 ignoredisk --only-use={{ hostvars[item]['disk'] }}
+partition /boot/efi --fstype=vfat --size=512
+partition / --fstype=ext4 --size=65536
 
-# EFI & XFS root (you can change to ext4 if you prefer)
-part /boot/efi    --fstype=vfat --size=512
-part pv.01        --grow        --size=1
-volgroup vg0 pv.01
-logvol /           --fstype=xfs --name=root  --vgname=vg0 --size=65536
-logvol swap        --fstype=swap--name=swap  --vgname=vg0 --size=2048
+# Network information
+network --bootproto=static --device={{ hostvars[item]['network_interface'] }} --ip={{ hostvars[item]['ansible_host'] }} --gateway={{ ansible_default_ipv4.gateway }} --nameserver={{ dns_server }} --netmask={{ ansible_default_ipv4.netmask }} --ipv6=auto --hostname={{ hostvars[item]['inventory_hostname'] }} --activate
 
-# Repositories
-repo --name=BaseOS     --baseurl=http://{{ ansible_default_ipv4.address }}/os/BaseOS
-repo --name=AppStream  --baseurl=http://{{ ansible_default_ipv4.address }}/os/AppStream
-
-# First-boot and GUI
+# Use network installation
+repo --name="Repository" --baseurl=http://{{ ansible_default_ipv4.address }}/os
+url --url="http://{{ ansible_default_ipv4.address }}/os"
+# Disable Setup Agent on first boot
 firstboot --disable
+# Do not configure the X Window System
 skipx
-
-# Services & time
-services --enabled=chronyd,sshd
+# Enable NTP
+services --enabled="chronyd"
+# System timezone
 timezone {{ timezone }} --utc
 
-# Security
-selinux --disabled
-firewall --disabled
-
-# Users
-user --name=admin --groups=wheel --plaintext  --lock-password
-sshkey --username=admin "{{ ssh_public_key }}"
+# Create user (locked by default)
+user --groups=wheel --name=admin
+# Add SSH key
+sshkey --username=root "{{ ssh_public_key }}"
+# Disable root password login
 rootpw --lock
 
-# Packages
+# Disable SELinux
+selinux --disabled
+
+# Disable firewall
+firewall --disabled
+
 %packages
-@^Minimal Install
+@^custom-environment
 openssh-server
 %end
 
-# Post-install: raw partition for Ceph
+# Create a raw partition for Ceph using the remaining space
+# Using a post script because there is no built-in feature in Kickstart
+# The three empty lines are equivalent to pressing Enter to use the default values for:
+# - Partition number
+# - First sector
+# - Last sector
 %post
-# create one more partition on the remaining space
-(
-  echo n      # new partition
-  echo       # accept default: primary
-  echo       # accept default: partition number
-  echo       # first sector
-  echo       # last sector (rest of disk)
-  echo w      # write table
-) | fdisk /dev/{{ hostvars[item]['disk'] }}
+fdisk /dev/{{ hostvars[item]['disk'] }} << EOF
+new
+
+
+
+write
+EOF
 %end
 
 reboot

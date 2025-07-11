@@ -5,7 +5,7 @@
       network: "{{ host_network | ansible.netcommon.ipmath(1) }}"
       netmask: "{{ netmask }}"
       gateway: "{{ gateway }}"
-      interface: "{{ interface }}
+      interface: "{{ interface }}"
       broadcast: "{{ broadcast }}"
 
 - name: Get Docker info
@@ -32,9 +32,16 @@
     cmd: "xorriso -osirrox on -indev {{ iso.dest }} -extract / {{ role_path }}/files/data/os"
     creates: "{{ role_path }}/files/data/os/.treeinfo"
 
-- name: Find all directories under {{ role_path }}/files/data/os/
+# - name: Extract only the x86_64-efi helper directory from the ISO
+#   ansible.builtin.command:
+#     cmd: >
+#       xorriso -osirrox on -indev {{ iso.dest }} -extract /EFI/BOOT/x86_64-efi {{ role_path }}/files/data/os/EFI/BOOT
+#   args:
+#     creates: "{{ role_path }}/files/data/os/EFI/BOOT/x86_64-efi/command.lst"
+
+- name: Find all directories under {{ role_path }}/files/
   ansible.builtin.find:
-    paths: "{{ role_path }}/files/data/os/"
+    paths: "{{ role_path }}/files/data/"
     file_type: directory
     recurse: true
   register: os_dirs
@@ -45,9 +52,9 @@
     mode: "0755"
   loop: "{{ os_dirs.files }}"
 
-- name: Find all files under {{ role_path }}/files/data/os/
+- name: Find all files under {{ role_path }}/files/
   ansible.builtin.find:
-    paths: "{{ role_path }}/files/data/os/"
+    paths: "{{ role_path }}/files/data/"
     file_type: file
     recurse: true
   register: os_files
