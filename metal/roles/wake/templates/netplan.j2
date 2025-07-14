@@ -1,0 +1,10 @@
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses:
+        - {{ ansible_host }}/{{ ansible_default_ipv4.network_prefix }}
+      gateway4: "{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"
+      nameservers:
+        addresses: {{ nameservers }}

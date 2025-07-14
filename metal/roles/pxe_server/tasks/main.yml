@@ -4,7 +4,7 @@
       address: "{{ host_address }}"
       network: "{{ host_network | ansible.netcommon.ipmath(1) }}"
       netmask: "{{ netmask }}"
-      gateway: "{{ gateway }}"
+      gateway: "{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"
       interface: "{{ interface }}"
       broadcast: "{{ broadcast }}"
 
@@ -89,3 +89,75 @@
     project_src: "{{ role_path }}/files"
     state: present
     build: always
+
+- name: Ensure ip forwarding is enabled
+  ansible.builtin.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Install iptables‑persistent (Debian/Ubuntu)
+  ansible.builtin.package:
+    name: iptables-persistent
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Install iptables services (RHEL/CentOS)
+  ansible.builtin.package:
+    name: iptables-services
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Set up NAT masquerade rule
+  ansible.builtin.command: >
+    iptables -t nat -C POSTROUTING -o {{ internet_if }} -j MASQUERADE
+  register: nat_rule_check
+  failed_when: nat_rule_check.rc not in [0,1]
+  changed_when: nat_rule_check.rc == 1
+
+- name: Add NAT masquerade if missing
+  ansible.builtin.command: >
+    iptables -t nat -A POSTROUTING -o {{ internet_if }} -j MASQUERADE
+  when: nat_rule_check.rc == 1
+
+- name: Allow forwarding from LAN to WAN
+  ansible.builtin.command: >
+    iptables -C FORWARD -i {{ cluster_if }} -o {{ internet_if }} -m state --state RELATED,ESTABLISHED -j ACCEPT
+  register: fwd_est_check
+  failed_when: fwd_est_check.rc not in [0,1]
+  changed_when: fwd_est_check.rc == 1
+
+- name: Add FORWARD rule for established connections
+  ansible.builtin.command: >
+    iptables -A FORWARD -i {{ cluster_if }} -o {{ internet_if }} -m state --state RELATED,ESTABLISHED -j ACCEPT
+  when: fwd_est_check.rc == 1
+
+- name: Allow forwarding from WAN to LAN
+  ansible.builtin.command: >
+    iptables -C FORWARD -i {{ internet_if }} -o {{ cluster_if }} -j ACCEPT
+  register: fwd_new_check
+  failed_when: fwd_new_check.rc not in [0,1]
+  changed_when: fwd_new_check.rc == 1
+
+- name: Add FORWARD rule for new connections
+  ansible.builtin.command: >
+    iptables -A FORWARD -i {{ internet_if }} -o {{ cluster_if }} -j ACCEPT
+  when: fwd_new_check.rc == 1
+
+- name: Save iptables rules (Debian/Ubuntu)
+  ansible.builtin.command: >
+    netfilter-persistent save
+  when: ansible_os_family == 'Debian'
+
+- name: Save iptables rules (RHEL/CentOS)
+  ansible.builtin.command: >
+    service iptables save
+  when: ansible_os_family == 'RedHat'
+
+- name: Ensure iptables service is enabled and running (RHEL)
+  ansible.builtin.service:
+    name: iptables
+    state: started
+    enabled: yes
+  when: ansible_os_family == 'RedHat'

@@ -12,3 +12,31 @@
 - name: Wait for the machines to come online
   ansible.builtin.wait_for_connection:
     timeout: 600
+
+- name: Render netplan config for Ubuntu‑style nodes
+  ansible.builtin.template:
+    src: netplan-eth0.j2
+    dest: /etc/netplan/01-netcfg.yaml
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == 'Debian'
+
+- name: Apply netplan
+  ansible.builtin.command: netplan apply
+  when: ansible_os_family == 'Debian'
+
+- name: Configure RHEL‑style network script
+  ansible.builtin.template:
+    src: ifcfg-eth0.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth0
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == 'RedHat'
+
+- name: Restart network service on RHEL
+  ansible.builtin.service:
+    name: network
+    state: restarted
+  when: ansible_os_family == 'RedHat'

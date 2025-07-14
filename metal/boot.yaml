@@ -7,9 +7,17 @@
   hosts: localhost
   roles:
     - pxe_server
+  vars:
+    cluster_if: "{{ interface }}"
+    internet_if: "{{ internet_interface }}"
 
 - name: Provision bare metal machines
   hosts: metal
   gather_facts: false
   roles:
     - wake
+  vars:
+    gateway: "{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"
+    nameservers:
+      - 8.8.8.8
+      - 1.1.1.1
