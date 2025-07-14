@@ -11,9 +11,18 @@
     cluster_if: "{{ interface }}"
     internet_if: "{{ internet_interface }}"
 
+- name: Enable iptables masquerading
+  hosts: localhost
+  roles:
+    - nat
+  vars:
+    masquerade_out_interface: 'wlan0'
+    masquerade_source: '192.168.3.0/24'
+    masquerade_protocol: 'tcp'
+
 - name: Provision bare metal machines
   hosts: metal
-  gather_facts: true
+  gather_facts: false
   roles:
     - wake
   vars:

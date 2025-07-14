@@ -13,6 +13,11 @@
   ansible.builtin.wait_for_connection:
     timeout: 600
 
+- name: Gather facts
+  ansible.builtin.setup:
+    gather_subset:
+      - all
+
 - name: Render netplan config for Ubuntu‑style nodes
   ansible.builtin.template:
     src: netplan.j2
@@ -43,8 +48,8 @@
 
 - name: Configure Fedora network via nmcli
   community.general.nmcli:
-    conn_name: eth0
-    ifname: eth0
+    conn_name: enp88s0
+    ifname: enp88s0
     type: ethernet
     ip4: "{{ ansible_default_ipv4.address }}/{{ ansible_default_ipv4.network_prefix }}"
     gw4: "{{ gateway }}"
@@ -52,7 +57,7 @@
     state: present
   when: ansible_distribution == 'Fedora'
 
-- name: Bring up the Fedora eth0 connection
+- name: Bring up the Fedora enp88s0 connection
   ansible.builtin.command:
-    cmd: nmcli connection up eth0
+    cmd: nmcli connection up enp88s0
   when: ansible_distribution == 'Fedora'
