@@ -6,3 +6,27 @@
     - {name: "fs.inotify.max_queued_events", value: 16384}
     - {name: "fs.inotify.max_user_instances", value: 8192}
     - {name: "fs.inotify.max_user_watches", value: 524288}
+
+- name: Ensure Python3 and pip are installed
+  package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+
+- name: Upgrade packages using pip
+  pip:
+    name:
+      - urllib3
+      - requests
+    state: latest
+    executable: pip3
+
+- name: Install `tar` (Fedora)
+  yum:
+    name: tar
+    state: present
+  become: true
+
+- name: Gather facts
+  setup:

@@ -10,7 +10,7 @@
   iptables:
     table: nat
     chain: POSTROUTING
-    source: "{{ interface }}"
+    source: "{{ host_network }}"
     out_interface: "{{ internet_interface }}"
     jump: MASQUERADE
     state: present
