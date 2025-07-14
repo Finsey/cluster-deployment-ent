@@ -11,7 +11,7 @@ dhcp-option=3,{{ ansible_default_ipv4.gateway }}
 
 # Per-host fixed leases
 {% for host in groups['metal'] %}
-dhcp-host={{ hostvars[item]['mac'] }},{{ hostvars[item]['ansible_host'] }}
+dhcp-host={{ hostvars[host]['mac'] }},{{ hostvars[host]['ansible_host'] }}
 {% endfor %}
 
 # Match Arch Types efi x86 and x64
