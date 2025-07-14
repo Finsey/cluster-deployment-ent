@@ -18,6 +18,7 @@
     gather_subset:
       - all
 
+# Caution: Untested
 - name: Render netplan config for Ubuntu‑style nodes
   ansible.builtin.template:
     src: netplan.j2
@@ -27,10 +28,12 @@
     mode: 0644
   when: ansible_os_family == 'Debian'
 
+# Caution: Untested
 - name: Apply netplan
   ansible.builtin.command: netplan apply
   when: ansible_os_family == 'Debian'
 
+# Caution: Untested
 - name: Configure RHEL‑style network script
   ansible.builtin.template:
     src: ifcfg-eth0.j2
@@ -38,20 +41,21 @@
     owner: root
     group: root
     mode: 0644
-  when: ansible_os_family == 'RedHat'
+  when: ansible_distribution == 'RedHat'
 
+# Caution: Untested
 - name: Restart network service on RHEL
   ansible.builtin.service:
     name: network
     state: restarted
-  when: ansible_os_family == 'RedHat'
+  when: ansible_distribution == 'RedHat'
 
 - name: Configure Fedora network via nmcli
   community.general.nmcli:
     conn_name: enp88s0
     ifname: enp88s0
     type: ethernet
-    ip4: "{{ ansible_default_ipv4.address }}/{{ ansible_default_ipv4.network_prefix }}"
+    ip4: "{{ ansible_default_ipv4.address }}/24"
     gw4: "{{ gateway }}"
     dns4: "{{ nameservers }}"
     state: present

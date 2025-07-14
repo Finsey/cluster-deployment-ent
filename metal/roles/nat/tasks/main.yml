@@ -1,19 +1,47 @@
-- name: Create Iptables NAT chain
-  iptables:
-    table: nat
-    chain: POSTROUTING
-    out_interface: '{{ masquerade_out_interface }}'
-    source: '{{ masquerade_source }}'
-    destination: '{{ masquerade_destination }}'
-    jump: MASQUERADE
-    protocol: '{{ masquerade_protocol }}'
-    comment: Ansible NAT Masquerade
-  when: ip_forwarding | bool
-
 - name: Enable IPv4 forwarding
   sysctl:
     name: net.ipv4.ip_forward
-    value: 1
+    value: '1'
     state: present
-    reload: True
+    reload: true
   when: ip_forwarding | bool
+
+- name: Masquerade LAN → WAN
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    source: "{{ interface }}"
+    out_interface: "{{ internet_interface }}"
+    jump: MASQUERADE
+    state: present
+
+- name: Allow forwarding LAN → WAN
+  iptables:
+    table: filter
+    chain: FORWARD
+    in_interface: "{{ interface }}"
+    out_interface: "{{ internet_interface }}"
+    source: "{{ host_network }}"
+    jump: ACCEPT
+    state: present
+
+- name: Allow forwarding WAN → LAN for established connections
+  iptables:
+    table: filter
+    chain: FORWARD
+    in_interface: "{{ internet_interface }}"
+    out_interface: "{{ interface }}"
+    ctstate: RELATED,ESTABLISHED
+    jump: ACCEPT
+    state: present
+
+- name: Ensure Docker‑USER chain does not block us
+  iptables:
+    table: filter
+    chain: DOCKER-USER
+    jump: ACCEPT
+    state: present
+
+- name: Save iptables (RHEL/Fedora/CentOS)
+  command: service iptables save
+  when: ansible_os_family in ['RedHat','Fedora']
