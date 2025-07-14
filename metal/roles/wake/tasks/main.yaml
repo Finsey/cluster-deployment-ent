@@ -15,7 +15,7 @@
 
 - name: Render netplan config for Ubuntu‑style nodes
   ansible.builtin.template:
-    src: netplan-eth0.j2
+    src: netplan.j2
     dest: /etc/netplan/01-netcfg.yaml
     owner: root
     group: root
@@ -29,7 +29,7 @@
 - name: Configure RHEL‑style network script
   ansible.builtin.template:
     src: ifcfg-eth0.j2
-    dest: /etc/sysconfig/network-scripts/ifcfg-eth0
+    dest: /etc/sysconfig/network-scripts/ifcfg
     owner: root
     group: root
     mode: 0644
@@ -40,3 +40,19 @@
     name: network
     state: restarted
   when: ansible_os_family == 'RedHat'
+
+- name: Configure Fedora network via nmcli
+  community.general.nmcli:
+    conn_name: eth0
+    ifname: eth0
+    type: ethernet
+    ip4: "{{ ansible_default_ipv4.address }}/{{ ansible_default_ipv4.network_prefix }}"
+    gw4: "{{ gateway }}"
+    dns4: "{{ nameservers }}"
+    state: present
+  when: ansible_distribution == 'Fedora'
+
+- name: Bring up the Fedora eth0 connection
+  ansible.builtin.command:
+    cmd: nmcli connection up eth0
+  when: ansible_distribution == 'Fedora'
