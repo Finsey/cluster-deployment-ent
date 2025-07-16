@@ -6,3 +6,4 @@
   collections:
     - community.kubernetes
     - kubernetes.core
+  helm_version: v3.17.0

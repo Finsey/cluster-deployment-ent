@@ -3,3 +3,52 @@
     name: "{{ item }}"
   loop:
     - kubernetes
+
+- name: Strip metadata from `rke2_version` variable
+  set_fact:
+    kubectl_version: "{{ rke2_version | regex_replace('\\+.*$', '') }}"
+
+- name: Download kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+
+- name: Verify kubectl client version
+  ansible.builtin.command:
+    cmd: kubectl version --client --short
+  register: kubectl_ver
+  changed_when: false
+
+- name: Show installed kubectl version
+  ansible.builtin.debug:
+    msg: "{{ kubectl_ver.stdout }}"
+
+- name: Download Helm {{ helm_version }}
+  ansible.builtin.get_url:
+    url: "https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz"
+    dest: /tmp/helm-{{ helm_version }}.tar.gz
+    mode: '0644'
+
+- name: Unpack Helm archive
+  ansible.builtin.unarchive:
+    src: /tmp/helm-{{ helm_version }}.tar.gz
+    dest: /tmp
+    remote_src: yes
+    strip_components: 1
+
+- name: Move helm binary into place
+  ansible.builtin.copy:
+    src: /tmp/helm
+    dest: /usr/local/bin/helm
+    mode: '0755'
+
+- name: Verify Helm version
+  ansible.builtin.command:
+    cmd: helm version --client
+  register: helm_ver
+  changed_when: false
+
+- name: Show installed Helm version
+  ansible.builtin.debug:
+    msg: "{{ helm_ver.stdout }}"
