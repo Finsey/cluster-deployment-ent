@@ -4,15 +4,65 @@
   loop:
     - kubernetes
 
-- name: Strip metadata from `rke2_version` variable
-  set_fact:
-    kubectl_version: "{{ rke2_version | regex_replace('\\+.*$', '') }}"
+- name: create kubectl versioned directory
+  file:
+    path: /opt/kubectl-{{ kubectl_version }}
+    state: directory
+  become: true
 
 - name: Download kubectl
   ansible.builtin.get_url:
     url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
-    dest: /usr/local/bin/kubectl
+    dest: /opt/kubectl-{{ kubectl_version }}
+  register: kubectl
+  become: true
+
+- name: Download the kubectl checksum
+  uri:
+    url: https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl.sha256
+    dest: /opt/kubectl-{{ kubectl_version }}
+  register: kubectl
+  become: true
+
+- name: Get kubectl sha256sum
+  shell: sha256sum /opt/kubectl-{{ kubectl_version }}/kubectl | cut -d " " -f1
+  register: file_shasum
+
+- set_fact:
+    shasum1={{ file_shasum.stdout }}
+
+- debug: var=shasum1
+  run_once: true
+
+- name: Get sha256sum value from file
+  command: cat /opt/kubectl-{{ kubectl_version }}/kubectl.sha256
+  register: downloaded_shasum
+
+- set_fact:
+    shasum2={{ downloaded_shasum.stdout }}
+
+- debug: var=shasum2
+  run_once: true
+
+- name: Assert that the kubectl binary is OK
+  assert:
+    that:
+      - file_shasum.stdout == downloaded_shasum.stdout
+    fail_msg: "Shasum does not correspond"
+    success_msg: "kubectl shasum verified: ok"
+
+- name: Change kubectl file permission
+  file:
+    path: "/opt/kubectl-{{ kubectl_version }}/kubectl"
     mode: '0755'
+  become: true
+
+- name: Create a symlink to kubectl
+  file:
+    src: "/opt/kubectl-{{ kubectl_version }}/kubectl"
+    dest: "/usr/bin/kubectl"
+    state: link
+  become: true
 
 - name: Verify kubectl client version
   ansible.builtin.command:

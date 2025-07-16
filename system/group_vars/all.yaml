@@ -1,2 +1,4 @@
-# RKE2
-rke2_version: v1.33.1+rke2r1
+# Software
+# kubectl must be within one major version of the version of Kubernetes running on the cluster
+kubectl_version: v1.33.1
+helm_version: 
