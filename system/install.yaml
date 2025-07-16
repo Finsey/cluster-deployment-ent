@@ -1,9 +1,8 @@
-- hosts: local
-  # gather_facts: false
+- name: Bootstrap the cluster
+  hosts: localhost
+  roles:
+    - libraries
+    - platform
   collections:
     - community.kubernetes
     - kubernetes.core
-
-  roles:
-    - libaries
-    - platform

@@ -1,4 +1,9 @@
 ---
+- name: Ensure ~/.kube/ directory is present
+  ansible.builtin.file:
+    path: ~/.kube
+    state: directory
+    mode: '0755'
 
 - name: Download RKE2 kubeconfig to localhost
   ansible.builtin.fetch:

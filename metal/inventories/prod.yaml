@@ -16,3 +16,7 @@ metal:
     # workers:
     #   hosts:
     #     metal3: {ansible_host: 192.168.1.113, mac: '00:23:24:d1:f4:d6', disk: sda, network_interface: eno1}
+    k8s_cluster:
+      children:
+        masters: {}
+        workers: {}

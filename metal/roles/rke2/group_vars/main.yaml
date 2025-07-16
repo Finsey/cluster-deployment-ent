@@ -1,4 +1,0 @@
-rke2_version: v1.33.1+rke2r1
-rke2_cni: calico
-rke2_cluster_group_name: metal
-rke2_cis_profile: "cis"

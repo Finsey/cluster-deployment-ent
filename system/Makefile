@@ -1,6 +1,6 @@
 .POSIX:
 
-export KUBECONFIG = $(shell pwd)/../metal/kubeconfig.yaml
+export KUBECONFIG = ~/.kube/kubeconfig.yaml
 
 # .PHONY: install
 default: deps install
