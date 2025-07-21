@@ -80,17 +80,14 @@
     dest: /tmp/helm-{{ helm_version }}.tar.gz
     mode: '0644'
 
-- name: Unpack Helm archive
-  ansible.builtin.unarchive:
-    src: /tmp/helm-{{ helm_version }}.tar.gz
-    dest: /tmp
-    remote_src: yes
-    strip_components: 1
+- name: Unpack Helm archive via tar
+  ansible.builtin.command:
+    cmd: tar -xvzf /tmp/helm-{{ helm_Version }}.tar.gz --strip-component=1 -C /tmp
 
 - name: Move helm binary into place
   ansible.builtin.copy:
     src: /tmp/helm
-    dest: /usr/local/bin/helm
+    dest: /usr/bin/helm
     mode: '0755'
 
 - name: Verify Helm version

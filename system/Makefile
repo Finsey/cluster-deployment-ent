@@ -11,4 +11,4 @@ deps:
 
 install:
 	ansible-playbook \
-		install.yaml
+		install.yaml --extra-vars deploy_action=install
