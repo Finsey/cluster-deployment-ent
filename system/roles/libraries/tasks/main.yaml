@@ -99,3 +99,10 @@
 - name: Show installed Helm version
   ansible.builtin.debug:
     msg: "{{ helm_ver.stdout }}"
+
+- name: Append to .bashrc
+  ansible.builtin.lineinfile:
+    dest: "~/.bashrc"
+    line: |
+        export $KUBECONFIG=$HOME/.kube/config
+        export $K8S_AUTH_KUBECONFIG=$HOME/.kube/config

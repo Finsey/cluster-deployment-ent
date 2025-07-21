@@ -2,8 +2,9 @@
 .PHONY: *
 .EXPORT_ALL_VARIABLES:
 
-KUBECONFIG = ~/.kube/kubeconfig.yaml
+KUBECONFIG = $HOME/.kube/config
 KUBE_CONFIG_PATH = $(KUBECONFIG)
+K8S_AUTH_KUBECONFIG = $(KUBECONFIG)
 
 default: metal system external smoke-test post-install clean
 
