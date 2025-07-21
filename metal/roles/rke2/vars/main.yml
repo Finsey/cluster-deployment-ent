@@ -4,3 +4,7 @@
 rke2_method: tar
 rke2_service_name: "rke2-{{ rke2_type }}.service"
 rke2_restart_needed: false
+# Optional changes
+rke2_download_kubeconf: true
+rke2_download_kubeconf_path: ~/.kube
+rke2_download_kubeconf_file_name: kubeconfig.yaml

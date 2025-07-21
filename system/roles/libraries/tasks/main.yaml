@@ -66,7 +66,7 @@
 
 - name: Verify kubectl client version
   ansible.builtin.command:
-    cmd: kubectl version --client --short
+    cmd: kubectl version --client
   register: kubectl_ver
   changed_when: false
 
