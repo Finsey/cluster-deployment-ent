@@ -3,9 +3,10 @@
   ansible.builtin.include_tasks:
     file: prerequisites.yaml
 
-- name: Create values
-  ansible.builtin.set_fact:
-    helm_values: "{{ lookup('template', '{{ role_path }}/templates/values/' + item.name + '.yaml.j2') | from_yaml }}"
+- name: Render values
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/values/{{ item.name }}.yaml.j2"
+    dest: "/tmp/{{ item.name }}.yaml"
 
 # - name: Check if pre-configuration file exists
 #   ansible.builtin.stat:
@@ -35,7 +36,7 @@
     release_namespace: "{{ item.namespace }}"
     create_namespace: false
     chart_repo_url: "{{ item.repo_url }}"
-    values: "{{ helm_values }}"
+    values: "/tmp/{{ item.name }}.yaml"
     wait: true
 
 - name: Include post-configurations only if file exists

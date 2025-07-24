@@ -431,14 +431,16 @@ ingress:
   # ingressClassName can replace the kubernetes.io/ingress.class annotation used in earlier Kubernetes releases.
   ingressClassName: nginx
   # -- Hostname of the Layer 7 load balancer.
-  host: longhorn."{{ domain_name }}"
+  host: longhorn.{{ dc_1 }}.{{ dc_2 }}
   # -- Setting that allows you to enable TLS on ingress records.
   tls: false
   # -- Setting that allows you to enable secure connections to the Longhorn UI service via port 443.
   secureBackends: false
   # -- TLS secret that contains the private key and certificate to be used for TLS. This setting applies only when TLS is enabled on ingress records.
   tlsSecret: longhorn.local-tls
+{% raw %}
   # -- Default ingress path. You can access the Longhorn UI by following the full ingress path {{host}}+{{path}}.
+{% endraw %}
   path: /
   # -- Ingress path type. To maintain backward compatibility, the default value is "ImplementationSpecific".
   pathType: Prefix

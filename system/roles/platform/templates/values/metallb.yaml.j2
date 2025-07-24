@@ -292,7 +292,9 @@ speaker:
     annotations: {}
   securityContext: {}
   ## Defines a secret name for the controller to generate a memberlist encryption secret
+{% raw %}
   ## By default secretName: {{ "metallb.fullname" }}-memberlist
+{% endraw %}
   ##
   # secretName:
   resources: {}
