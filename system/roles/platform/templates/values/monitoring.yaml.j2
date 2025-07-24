@@ -1454,12 +1454,12 @@ grafana:
       verbose_logging = true
 
       [[servers]]
-      host = "ldap.mcginn.home"
+      host = "ldap.{{ dc_1 }}.{{ dc_2 }}"
       port = 636
       use_ssl = true
       start_tls = false
       ssl_skip_verify = false
-      bind_dn = "uid=%s,ou=users,dc=mcginn,dc=home"
+      bind_dn = "uid=%s,ou=users,dc={{ dc_1 }},dc={{ dc_2 }}"
 
 ## Flag to disable all the kubernetes component scrapers
 ##
@@ -3668,7 +3668,7 @@ prometheus:
     # hosts:
     #   - prometheus.domain.com
     hosts:
-      - prometheus.mcginn.home
+      - prometheus.{{ dc_1 }}.{{ dc_2 }}
 
     ## Paths to use for ingress rules - one path should match the prometheusSpec.routePrefix
     ##

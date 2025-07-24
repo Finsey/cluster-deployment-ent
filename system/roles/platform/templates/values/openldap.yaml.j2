@@ -13,13 +13,13 @@ global:
   ##
   #imagePullSecrets: [""]
   ## ldapDomain , can be explicit (e.g dc=toto,c=ca) or domain based (e.g example.com)
-  ldapDomain: "dc=mcginn,dc=home"
+  ldapDomain: "dc={{ dc_1 }},dc={{ dc_2 }}"
   # Specifies an existing secret to be used for admin and config user passwords. The expected key are LDAP_ADMIN_PASSWORD and LDAP_CONFIG_ADMIN_PASSWORD.
   # existingSecret: ""
   ## Default Passwords to use, stored as a secret. Not used if existingSecret is set.
   adminUser: "admin"
   adminPassword: Not@SecurePassw0rd
-  configUser: "cn=admin,dc=mcginn,dc=home"
+  configUser: "cn=admin,dc={{ dc_1 }},dc={{ dc_2 }}"
   configPassword: Not@SecurePassw0rd
   ldapPort: 389
   sslLdapPort: 636
@@ -195,30 +195,30 @@ initialSchema: "cosine,inetorgperson,nis"
 customLdifFiles:
   01-root.ldif: |-
     # Root creation
-    dn: dc=mcginn,dc=home
+    dn: dc={{ dc_1 }},dc={{ dc_2 }}
     objectClass: dcObject
     objectClass: organization
-    o: McGinn, Home
-    dc: mcginn
+    o: {{ dc_1 }}, {{ dc_2 }}
+    dc: {{ dc_1 }}
   
   02-org-units.ldif: |-
-    dn: ou=People,dc=mcginn,dc=home
+    dn: ou=People,dc={{ dc_1 }},dc={{ dc_2 }}
     # objectClass: top
     objectClass: organizationalUnit
     ou: People
 
-    dn: ou=Groups,dc=mcginn,dc=home
+    dn: ou=Groups,dc={{ dc_1 }},dc={{ dc_2 }}
     # objectClass: top
     objectClass: organizationalUnit
     ou: Groups
 
   03-default-password.ldif: |-
-    dn: ou=Policies,dc=mcginn,dc=home
+    dn: ou=Policies,dc={{ dc_1 }},dc={{ dc_2 }}
     objectClass: top
     objectClass: organizationalUnit
     ou: Policies
 
-    dn: cn=default,ou=policies,dc=mcginn,dc=home
+    dn: cn=default,ou=policies,dc={{ dc_1 }},dc={{ dc_2 }}
     cn: default
     objectClass: pwdPolicy
     objectClass: namedPolicy
@@ -241,7 +241,7 @@ customLdifFiles:
     pwdSafeModify: FALSE
   
   04-default-user.ldif: |-
-    dn: uid=fmcginn,ou=People,dc=mcginn,dc=home
+    dn: uid=fmcginn,ou=People,dc={{ dc_1 }},dc={{ dc_2 }}
     objectClass: top
     objectClass: account
     objectClass: posixAccount
@@ -255,13 +255,13 @@ customLdifFiles:
     gidNumber: 10000
     homeDirectory: /home/finn
     loginShell: /bin/bash
-    mail: finn@mcginn.home
+    mail: finn@{{ dc_1 }}.{{ dc_2 }}
 
     # default password
     userPassword: Not@SecurePassw0rd
   
   05-users-group.ldif: |-
-    dn: cn=users,ou=Groups,dc=mcginn,dc=home
+    dn: cn=users,ou=Groups,dc={{ dc_1 }},dc={{ dc_2 }}
     objectClass: top
     objectClass: posixGroup
     gidNumber: 10000
@@ -649,7 +649,7 @@ ltb-passwd:
     pathType: Prefix
     ## Ingress Host
     hosts:
-    - "ldap.mcginn.home"
+    - "ldap.{{ dc_1 }}.{{ dc_2 }}"
     ## Ingress cert
     tls: []
     # - secretName: ssl-ldap2.example
@@ -680,7 +680,7 @@ phpldapadmin:
     pathType: Prefix
     ## Ingress Host
     hosts:
-    - ldapadmin.mcginn.home
+    - ldapadmin.{{ dc_1 }}.{{ dc_2 }}
     ## Ingress cert
     tls: []
     # - secretName: phpldapadmin.example

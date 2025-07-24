@@ -82,7 +82,7 @@
 
 - name: Unpack Helm archive via tar
   ansible.builtin.command:
-    cmd: tar -xvzf /tmp/helm-{{ helm_Version }}.tar.gz --strip-component=1 -C /tmp
+    cmd: tar -xvzf /tmp/helm-{{ helm_version }}.tar.gz --strip-component=1 -C /tmp
 
 - name: Move helm binary into place
   ansible.builtin.copy:
