@@ -1,6 +1,6 @@
 - name: Render MetalLB IPAddressPool into a real YAML
   template:
-    src: "{{ playbook_dir }}/templates/metallb/ipaddresspool.yaml.j2"
+    src: "{{ role_path }}/templates/metallb/ipaddresspool.yaml.j2"
     dest: "/tmp/ipaddresspool.yaml"
 
 - name: Apply MetalLB IPAddressPool

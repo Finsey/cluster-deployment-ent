@@ -48,6 +48,38 @@ helm_charts:
     repo_name: "ingress-nginx"
     chart_ref: "ingress-nginx"
     namespace: "ingress-nginx"
+    release_values:
+      controller:
+        hostNetwork: true
+        hostPort:
+          enabled: true
+        ingressClassResource:
+          default: true
+        tolerations:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: "Exists"
+            effect: "NoSchedule"
+        nodeSelector:
+          kubernetes.io/os: linux
+          kubernetes.io/hostname: 
+        service:
+          loadBalancerIP:
+          externalTrafficPolicy: "Local"
+        admissionWebhooks:
+          enabled: false
+        metrics:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+      defaultBackend:
+        enabled: true
+        tolerations:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: "Exists"
+            effect: "NoSchedule"
+        nodeSelector:
+          kubernetes.io/os: linux
+          kubernetes.io/hostname: home-cluster-control-plane
 
   # - name: vault
   #   version: "0.22.0"
@@ -91,3 +123,11 @@ helm_charts:
     repo_name: "longhorn"
     chart_ref: "longhorn"
     namespace: "longhorn-system"
+    release_values:
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        host: longhorn.{{ dc_1 }}.{{ dc_2 }}
+        pathType: Prefix
+        annotations:
+          kubernetes.io/ingress.class: nginx
