@@ -3,10 +3,13 @@
   ansible.builtin.include_tasks:
     file: prerequisites.yaml
 
-- name: Render values
-  ansible.builtin.template:
-    src: "{{ role_path }}/templates/values/{{ item.name }}.yaml.j2"
-    dest: "/tmp/{{ item.name }}.yaml"
+- name: Render values ({{ item.name }})
+  kubernetes.core.helm_teplate:
+    chart_ref: "{{ item.chart_ref }}"
+    chart_version: "{{ item.version }}"
+    release_values: "{{ item.release_values | default({}) }}"
+  register: rendered_values
+  when: item.release_values is defined
 
 # - name: Check if pre-configuration file exists
 #   ansible.builtin.stat:
@@ -36,7 +39,7 @@
     release_namespace: "{{ item.namespace }}"
     create_namespace: false
     chart_repo_url: "{{ item.repo_url }}"
-    values: "/tmp/{{ item.name }}.yaml"
+    values: "{{ rendered_values }}"
     wait: true
 
 - name: Include post-configurations only if file exists

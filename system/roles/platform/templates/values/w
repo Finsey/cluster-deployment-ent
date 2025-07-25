@@ -592,11 +592,11 @@ alertmanager:
   #       {{ end }}
 
   ingress:
-    enabled: true
+    enabled: false
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    ingressClassName: nginx
+    # ingressClassName: nginx
 
     annotations: {}
 
@@ -610,13 +610,13 @@ alertmanager:
 
     ## Hosts must be provided if Ingress is enabled.
     ##
-    hosts:
-      - alertmanager.{{ dc_1 }}.{{ dc_2 }}
+    hosts: []
+      # - alertmanager.domain.com
 
     ## Paths to use for ingress rules - one path should match the alertmanagerSpec.routePrefix
     ##
-    paths:
-    - /
+    paths: []
+    # - /
 
     ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
     ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
@@ -688,6 +688,7 @@ alertmanager:
 
     annotations: {}
     labels: {}
+
     ## Final form of the hostname for each per replica ingress is
     ## {{ ingressPerReplica.hostPrefix }}-{{ $replicaNumber }}.{{ ingressPerReplica.hostDomain }}
     ##
@@ -696,6 +697,7 @@ alertmanager:
     hostPrefix: ""
     ## Domain that will be used for the per replica ingress
     hostDomain: ""
+
     ## Paths to use for ingress rules
     ##
     paths: []
@@ -708,6 +710,7 @@ alertmanager:
     ## Secret name containing the TLS certificate for alertmanager per replica ingress
     ## Secret must be manually created in the namespace
     tlsSecretName: ""
+
     ## Separated secret for each per replica Ingress. Can be used together with cert-manager
     ##
     tlsSecretPerReplica:
@@ -716,6 +719,7 @@ alertmanager:
       ## {{ tlsSecretPerReplica.prefix }}-{{ $replicaNumber }}
       ##
       prefix: "alertmanager"
+
   ## Configuration for Alertmanager service
   ##
   service:
@@ -1250,12 +1254,12 @@ grafana:
   ingress:
     ## If true, Grafana Ingress will be created
     ##
-    enabled: yes
+    enabled: false
 
     ## IngressClassName for Grafana Ingress.
     ## Should be provided if Ingress is enable.
     ##
-    ingressClassName: nginx
+    # ingressClassName: nginx
 
     ## Annotations for Grafana Ingress
     ##
@@ -1272,8 +1276,7 @@ grafana:
     ##
     # hosts:
     #   - grafana.domain.com
-    hosts:
-      - grafana.{{ dc_1 }}.{{ dc_2 }}
+    hosts: []
 
     ## Path for grafana ingress
     path: /
@@ -1281,10 +1284,10 @@ grafana:
     ## TLS configuration for grafana Ingress
     ## Secret must be manually created in the namespace
     ##
-    # tls:
+    tls: []
     # - secretName: grafana-general-tls
     #   hosts:
-    #   - grafana.{{ dc_1 }}.{{ dc_2 }}
+    #   - grafana.example.com
 
   # # To make Grafana persistent (Using Statefulset)
   # #
@@ -1380,6 +1383,7 @@ grafana:
   deleteDatasources: []
   # - name: example-datasource
   #   orgId: 1
+
   ## Configure additional grafana datasources (passed through tpl)
   ## ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
   additionalDataSources: []
@@ -1396,6 +1400,7 @@ grafana:
   #   type: prometheus
   #   url: https://{{ printf "%s-prometheus.svc" .Release.Name }}:9090
   #   version: 1
+
   # Flag to mark provisioned data sources for deletion if they are no longer configured.
   # It takes no effect if data sources are already listed in the deleteDatasources section.
   # ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#example-data-source-configuration-file
@@ -1440,20 +1445,6 @@ grafana:
     #   targetLabel: nodename
     #   replacement: $1
     #   action: replace
-
-  ldap:
-    enabled: true
-    existingSecret: ""
-    config: |-
-      verbose_logging = true
-
-      [[servers]]
-      host = "ldap.{{ dc_1 }}.{{ dc_2 }}"
-      port = 636
-      use_ssl = true
-      start_tls = false
-      ssl_skip_verify = false
-      bind_dn = "uid=%s,ou=users,dc={{ dc_1 }},dc={{ dc_2 }}"
 
 ## Flag to disable all the kubernetes component scrapers
 ##
@@ -2563,6 +2554,7 @@ prometheus-node-exporter:
     ## If true, create PSPs for node-exporter
     ##
     pspEnabled: false
+
 ## Manages Prometheus and Alertmanager components
 ##
 prometheusOperator:
@@ -2587,6 +2579,7 @@ prometheusOperator:
     tlsMinVersion: VersionTLS13
     # The default webhook port is 10250 in order to work out-of-the-box in GKE private clusters and avoid adding firewall rules.
     internalPort: 10250
+
   ## Liveness probe for the prometheusOperator deployment
   ##
   livenessProbe:
@@ -3056,6 +3049,7 @@ prometheusOperator:
 
   ## Decrease log verbosity to errors only
   # logLevel: error
+
   kubeletService:
     ## If true, the operator will create and maintain a service for scraping kubelets
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/helm/prometheus-operator/README.md
@@ -3065,6 +3059,7 @@ prometheusOperator:
     selector: ""
     ## Use '{{ template "kube-prometheus-stack.fullname" . }}-kubelet' by default
     name: ""
+
   ## Create Endpoints objects for kubelet targets.
   kubeletEndpointsEnabled: true
   ## Create EndpointSlice objects for kubelet targets.
@@ -3640,11 +3635,11 @@ prometheus:
   #     someoneelse:$apr1$DMZX2Z4q$6SbQIfyuLQd.xmo/P0m2c.
 
   ingress:
-    enabled: true
+    enabled: false
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    ingressClassName: nginx
+    # ingressClassName: nginx
 
     annotations: {}
     labels: {}
@@ -3657,8 +3652,7 @@ prometheus:
     ##
     # hosts:
     #   - prometheus.domain.com
-    hosts:
-      - prometheus.{{ dc_1 }}.{{ dc_2 }}
+    hosts: []
 
     ## Paths to use for ingress rules - one path should match the prometheusSpec.routePrefix
     ##
@@ -3730,6 +3724,7 @@ prometheus:
 
     annotations: {}
     labels: {}
+
     ## Final form of the hostname for each per replica ingress is
     ## {{ ingressPerReplica.hostPrefix }}-{{ $replicaNumber }}.{{ ingressPerReplica.hostDomain }}
     ##
@@ -3738,6 +3733,7 @@ prometheus:
     hostPrefix: ""
     ## Domain that will be used for the per replica ingress
     hostDomain: ""
+
     ## Paths to use for ingress rules
     ##
     paths: []
@@ -3750,6 +3746,7 @@ prometheus:
     ## Secret name containing the TLS certificate for Prometheus per replica ingress
     ## Secret must be manually created in the namespace
     tlsSecretName: ""
+
     ## Separated secret for each per replica Ingress. Can be used together with cert-manager
     ##
     tlsSecretPerReplica:
@@ -3758,6 +3755,7 @@ prometheus:
       ## {{ tlsSecretPerReplica.prefix }}-{{ $replicaNumber }}
       ##
       prefix: "prometheus"
+
   ## Configure additional options for default pod security policy for Prometheus
   ## ref: https://kubernetes.io/docs/concepts/security/pod-security-policy/
   podSecurityPolicy:
@@ -4329,6 +4327,7 @@ prometheus:
     #    {{end}}
     #    relabel_configs:
     #    ...
+
 
     ## If additional scrape configurations are already deployed in a single secret file you can use this section.
     ## Expected values are the secret name and key
@@ -5107,6 +5106,7 @@ thanosRuler:
     ## The external URL the Thanos Ruler instances will be available under. This is necessary to generate correct URLs. This is necessary if Thanos Ruler is not served from root of a DNS name. string false
     ##
     externalPrefix:
+
     ## If true, http://{{ template "kube-prometheus-stack.thanosRuler.name" . }}.{{ template "kube-prometheus-stack.namespace" . }}:{{ .Values.thanosRuler.service.port }}
     ## will be used as value for externalPrefix
     externalPrefixNilUsesHelmValues: true
@@ -5115,6 +5115,7 @@ thanosRuler:
     ## but the server serves requests under a different route prefix. For example for use with kubectl proxy.
     ##
     routePrefix: /
+
     ## ObjectStorageConfig configures object storage in Thanos
     objectStorageConfig:
       # use existing secret, if configured, objectStorageConfig.secret will not be used
@@ -5301,6 +5302,7 @@ thanosRuler:
 ## Setting to true produces cleaner resource names, but requires a data migration because the name of the persistent volume changes. Therefore this should only be set once on initial installation.
 ##
 cleanPrometheusOperatorObjectNames: false
+
 ## Extra manifests to deploy.  Can be of type dict or list.
 ## If dict, keys are ignored and only values are used.
 ## Items contained within extraObjects can be defined as dict or string and are passed through tpl.
@@ -5327,3 +5329,5 @@ extraManifests: null
   #   data:
   #     plaintext: Zm9vYmFy
   #     templated: '{{ print "foobar" | upper | b64enc }}'
+
+root@DESKTOP-IM3AFIU:/mnt/c/Users/user#

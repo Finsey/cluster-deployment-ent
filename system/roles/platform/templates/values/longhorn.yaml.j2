@@ -438,9 +438,7 @@ ingress:
   secureBackends: false
   # -- TLS secret that contains the private key and certificate to be used for TLS. This setting applies only when TLS is enabled on ingress records.
   tlsSecret: longhorn.local-tls
-{% raw %}
   # -- Default ingress path. You can access the Longhorn UI by following the full ingress path {{host}}+{{path}}.
-{% endraw %}
   path: /
   # -- Ingress path type. To maintain backward compatibility, the default value is "ImplementationSpecific".
   pathType: Prefix

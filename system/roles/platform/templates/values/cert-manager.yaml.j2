@@ -192,14 +192,12 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template.
   # +docs:property
   # name: ""
-{% raw %}
   # Optional additional annotations to add to the controller's Service Account. Templates are allowed for both keys and values.
   # Example using templating:
   # annotations:
   #   "{{ .Chart.Name }}-helm-chart/version": "{{ .Chart.Version }}"
   # +docs:property
   # annotations: {}
-{% endraw %}
   # Optional additional labels to add to the controller's Service Account.
   # +docs:property
   # labels: {}
@@ -1442,7 +1440,6 @@ startupapicheck:
   # links.
   enableServiceLinks: false
 
-{% raw %}
 # Create dynamic manifests via values.
 #
 # For example:
@@ -1453,7 +1450,6 @@ startupapicheck:
 #     metadata:
 #       name: '{{ template "cert-manager.fullname" . }}-extra-configmap'
 extraObjects: []
-{% endraw %}
 
 # Field used by our release pipeline to produce the static manifests.
 # The field defaults to "helm" but is set to "static" when we render
