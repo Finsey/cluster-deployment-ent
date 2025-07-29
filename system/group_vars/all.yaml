@@ -1,0 +1,13 @@
+# Software
+# kubectl must be within one major version of the version of Kubernetes running on the cluster
+kubectl_version: v1.33.1
+helm_version: v3.18.4
+
+# MetalLB
+load_balancer_ip_pool_static: 192.168.3.128/27
+load_balancer_ip_pool_dynamic: 192.168.3.160/27
+
+# Ingress
+# Domain
+dc_1: "mcginn"
+dc_2: "home"

@@ -1,0 +1,9 @@
+TYPE=Ethernet
+BOOTPROTO=none
+DEVICE=eth0
+ONBOOT=yes
+IPADDR={{ ansible_host }}
+NETMASK={{ netmask }}
+GATEWAY="{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"
+DNS1={{ nameservers[0] }}
+DNS2={{ nameservers[1] }}

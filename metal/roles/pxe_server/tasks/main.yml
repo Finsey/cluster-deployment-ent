@@ -1,0 +1,91 @@
+- name: Instruct Ansible that default IPv4 is on the LAN link
+  set_fact:
+    ansible_default_ipv4:
+      address: "{{ host_address }}"
+      network: "{{ host_network | ansible.netcommon.ipmath(1) }}"
+      netmask: "{{ netmask }}"
+      gateway: "{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"
+      interface: "{{ interface }}"
+      broadcast: "{{ broadcast }}"
+
+- name: Get Docker info
+  docker_host_info: {}
+  register: docker_info_result
+
+- name: Ensure Docker is running on a supported operating system
+  fail:
+    msg: Docker host networking driver only works on Linux hosts, and is not supported on Docker Desktop for Mac or Windows (you can use a Linux VM with bridged networking instead)
+  when:
+    - docker_info_result.host_info.OperatingSystem == "Docker Desktop"
+
+- name: Download boot image
+  ansible.builtin.get_url:
+    url: "{{ iso_url }}"
+    dest: "{{ role_path }}/files/data/iso/{{ iso_url | basename }}"
+    checksum: "{{ iso_checksum }}"
+    mode: 0644
+  register: iso
+
+# Verify previous .treeinfo file does not exist
+- name: Extract boot image
+  ansible.builtin.command:
+    cmd: "xorriso -osirrox on -indev {{ iso.dest }} -extract / {{ role_path }}/files/data/os"
+    creates: "{{ role_path }}/files/data/os/.treeinfo"
+
+# - name: Extract only the x86_64-efi helper directory from the ISO
+#   ansible.builtin.command:
+#     cmd: >
+#       xorriso -osirrox on -indev {{ iso.dest }} -extract /EFI/BOOT/x86_64-efi {{ role_path }}/files/data/os/EFI/BOOT
+#   args:
+#     creates: "{{ role_path }}/files/data/os/EFI/BOOT/x86_64-efi/command.lst"
+
+- name: Find all directories under {{ role_path }}/files/
+  ansible.builtin.find:
+    paths: "{{ role_path }}/files/"
+    file_type: directory
+    recurse: true
+  register: os_dirs
+
+- name: Set directories to 0755
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0755"
+  loop: "{{ os_dirs.files }}"
+
+- name: Find all files under {{ role_path }}/files/
+  ansible.builtin.find:
+    paths: "{{ role_path }}/files/"
+    file_type: file
+    recurse: true
+  register: os_files
+
+- name: Set files to 0644
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0644"
+  loop: "{{ os_files.files }}"
+
+- name: Generate dnsmasq config
+  ansible.builtin.template:
+    src: dnsmasq.conf.j2
+    dest: "{{ role_path }}/files/data/pxe-config/dnsmasq.conf"
+    mode: 0644
+
+- name: Generate GRUB config
+  ansible.builtin.template:
+    src: grub.cfg.j2
+    dest: "{{ role_path }}/files/data/pxe-config/grub.cfg"
+    mode: 0644
+
+- name: Generate init config for each machine
+  ansible.builtin.template:
+    src: kickstart.ks.j2
+    dest: "{{ role_path }}/files/data/init-config/{{ hostvars[item]['mac'] }}.ks"
+    mode: 0644
+  loop: "{{ groups['metal'] }}"
+
+- name: Start the ephemeral PXE server
+  community.docker.docker_compose_v2:
+    project_src: "{{ role_path }}/files"
+    state: present
+    build: always

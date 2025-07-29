@@ -1,0 +1,67 @@
+- name: Send Wake-on-LAN magic packets
+  community.general.wakeonlan:
+    mac: "{{ mac }}"
+  delegate_to: localhost
+
+- name: Send Wake-on-LAN magic packets (via ether-wake)
+  ansible.builtin.command:
+    cmd: ether-wake "{{ mac }}"
+  delegate_to: localhost
+  changed_when: false
+
+- name: Wait for the machines to come online
+  ansible.builtin.wait_for_connection:
+    timeout: 600
+
+- name: Gather facts
+  ansible.builtin.setup:
+    gather_subset:
+      - all
+
+# Caution: Untested
+- name: Render netplan config for Ubuntu‑style nodes
+  ansible.builtin.template:
+    src: netplan.j2
+    dest: /etc/netplan/01-netcfg.yaml
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == 'Debian'
+
+# Caution: Untested
+- name: Apply netplan
+  ansible.builtin.command: netplan apply
+  when: ansible_os_family == 'Debian'
+
+# Caution: Untested
+- name: Configure RHEL‑style network script
+  ansible.builtin.template:
+    src: ifcfg-eth0.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_distribution == 'RedHat'
+
+# Caution: Untested
+- name: Restart network service on RHEL
+  ansible.builtin.service:
+    name: network
+    state: restarted
+  when: ansible_distribution == 'RedHat'
+
+- name: Configure Fedora network via nmcli
+  community.general.nmcli:
+    conn_name: enp88s0
+    ifname: enp88s0
+    type: ethernet
+    ip4: "{{ ansible_default_ipv4.address }}/24"
+    gw4: "{{ gateway }}"
+    dns4: "{{ nameservers }}"
+    state: present
+  when: ansible_distribution == 'Fedora'
+
+- name: Bring up the Fedora enp88s0 connection
+  ansible.builtin.command:
+    cmd: nmcli connection up enp88s0
+  when: ansible_distribution == 'Fedora'

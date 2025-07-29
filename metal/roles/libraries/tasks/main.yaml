@@ -1,0 +1,49 @@
+ 
+
+- name: Install xorriso on Debian family
+  ansible.builtin.apt:
+    name: xorriso
+    state: present
+    update_cache: yes
+  become: true
+  when: ansible_os_family == "Debian"
+
+# xorriso should be included by default on RHEL 8/9 (non-minimal)
+- name: Bootstrap EPEL on RHEL 8/9
+  ansible.builtin.yum:
+    name: epel-release
+    state: present
+  become: true
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version is version("8", ">=")
+
+- name: Install xorriso on Debian family
+  ansible.builtin.apt:
+    name: xorriso
+    state: present
+    update_cache: yes
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Install xorriso on RHEL family
+  ansible.builtin.yum:
+    name: xorriso
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Install xorriso on SUSE family
+  ansible.builtin.zypper:
+    name: xorriso
+    state: present
+  when: ansible_os_family == "Suse"
+
+- name: Install Python libraries
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    executable: pip3
+    # extra_args: >-
+    #   --break-system-packages
+  loop:
+    - requests
+    - docker-py

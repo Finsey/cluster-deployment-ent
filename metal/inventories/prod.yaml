@@ -1,0 +1,22 @@
+all:
+  vars:
+    host_address: 192.168.3.10
+    host_network: 192.168.3.0/24
+    broadcast: 192.168.3.255
+    netmask: 255.255.255.0
+    interface: "eth0"             # LAN-facing interface name
+    internet_interface: "wlan0"   # Internet-facing interface name
+metal:
+  children:
+    masters:
+      hosts:
+        mn0: {ansible_host: 192.168.3.110, mac: '48:21:0b:36:cd:c8', disk: sda, network_interface: eth0}
+        # mn1: {ansible_host: 192.168.1.112, mac: '00:23:24:e7:04:60', disk: sda, network_interface: eno1}
+        # mn2: {ansible_host: 192.168.1.112, mac: '00:23:24:e7:04:60', disk: sda, network_interface: eno1}
+    # workers:
+    #   hosts:
+    #     metal3: {ansible_host: 192.168.1.113, mac: '00:23:24:d1:f4:d6', disk: sda, network_interface: eno1}
+    k8s_cluster:
+      children:
+        masters: {}
+        workers: {}

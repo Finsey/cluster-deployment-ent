@@ -1,0 +1,9 @@
+- name: Render MetalLB IPAddressPool into a real YAML
+  template:
+    src: "{{ role_path }}/templates/metallb/ipaddresspool.yaml.j2"
+    dest: "/tmp/ipaddresspool.yaml"
+
+- name: Apply MetalLB IPAddressPool
+  kubernetes.core.k8s:
+    state: present
+    src: "/tmp/ipaddresspool.yaml"

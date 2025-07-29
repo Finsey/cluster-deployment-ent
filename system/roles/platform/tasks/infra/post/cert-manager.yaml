@@ -1,0 +1,82 @@
+---
+- name: Store root certificate and private key as Kubernetes secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: root-ca
+        namespace: cert-manager
+      stringData:
+        tls.crt: "{{ rca_crt_b64 }}"
+        tls.key: "{{ rca_key_b64 }}"
+
+- name: Create intermediate cluster issuer
+  vars:
+    issuer_name: intermediate-ca-issuer
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: "{{ issuer_name }}"
+      spec:
+        ca:
+          secretName: root-ca
+          # crtlDistributionPonts:
+          # - "https.example.com"
+
+- name: Create intermediate certificate
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: intermediate-ca
+        namespace: cert-manager
+      spec:
+        isCA: true
+        commonName: "{{ domain_name }} Intermediate CA"
+        secretName: intermediate-ca
+        privateKey:
+          algorithm: ECDSA
+          size: 256
+        issuerRef:
+          name: intermediate-ca-issuer
+          kind: ClusterIssuer
+
+- name: Create intermediate domain cluster issuer
+  vars:
+    issuer_name: domain-ca-issuer
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: "{{ issuer_name }}"
+      spec:
+        ca:
+          secretName: intermediate-ca
+
+# Default certificate for TLS to terminate against
+- name: Create domain certificate
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: domain-tls
+        namespace: cert-manager
+      spec:
+        dnsNames:
+        - "*.{{ domain_name }}"
+        secretName: domain-tls
+        issuerRef:
+          name: domain-ca-issuer
+          kind: ClusterIssuer

@@ -1,0 +1,31 @@
+- name: Create new zone for *.{{ domain_name }}
+  kubernetes.core.k8s:
+    state: present
+    # src can be relative to the role's files/ directory
+    src: "{{ role_path }}/files/coredns/coredns-custom.yaml"
+
+# - name: Patch CoreDNS Deployment to hostNetwork
+#   community.kubernetes.k8s:
+#     state: patched
+#     kind: Deployment
+#     namespace: kube-system
+#     name: coredns
+#     merge_type: strategic-merge
+#     patch:
+#       spec:
+#         template:
+#           spec:
+#             hostNetwork: true
+
+# - name: Restart CoreDNS pods
+#   community.kubernetes.k8s:
+#     state: patched
+#     kind: Deployment
+#     namespace: kube-system
+#     name: coredns
+#     patch:
+#       spec:
+#         template:
+#           metadata:
+#             annotations:
+#               redeploy-timestamp: "{{ lookup('pipe','date +%s') }}"

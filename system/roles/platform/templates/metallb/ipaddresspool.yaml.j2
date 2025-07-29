@@ -1,0 +1,28 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: static-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - "{{ load_balancer_ip_pool_static }}"
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: dynamic-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - "{{ load_balancer_ip_pool_dynamic }}"
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: kind-adv
+  namespace: metallb-system
+spec:
+  ipAddressPools: 
+    - static-pool
+    - dynamic-pool

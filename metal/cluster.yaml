@@ -1,0 +1,8 @@
+- name: Create Kubernetes cluster
+  hosts: metal
+  roles:
+    - prerequisites
+    - rke2
+    - automatic_upgrade
+  collections:
+    - community.docker

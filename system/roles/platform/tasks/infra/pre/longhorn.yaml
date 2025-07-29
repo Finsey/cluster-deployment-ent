@@ -1,0 +1,9 @@
+- name: Run `iscsi` installer
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/longhorn/longhorn/v1.9.1/deploy/prerequisite/longhorn-iscsi-installation.yaml"
+
+- name: Run `nfs` installer
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/longhorn/longhorn/v1.9.1/deploy/prerequisite/longhorn-nfs-installation.yaml"
