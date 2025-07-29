@@ -8,3 +8,35 @@ rke2_restart_needed: false
 rke2_download_kubeconf: true
 rke2_download_kubeconf_path: ~/.kube
 rke2_download_kubeconf_file_name: config
+rke2_ingress_nginx_values:
+  controller:
+    hostNetwork: true
+    hostPort:
+      enabled: true
+    ingressClassResource:
+      default: true
+    tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+    nodeSelector:
+      kubernetes.io/os: linux
+      kubernetes.io/hostname: 
+    service:
+      loadBalancerIP:
+      externalTrafficPolicy: "Local"
+    admissionWebhooks:
+      enabled: false
+    metrics:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+  defaultBackend:
+    enabled: true
+    tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+    nodeSelector:
+      kubernetes.io/os: linux
+      kubernetes.io/hostname: home-cluster-control-plane
