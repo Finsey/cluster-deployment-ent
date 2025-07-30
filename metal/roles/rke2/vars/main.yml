@@ -24,8 +24,10 @@ rke2_ingress_nginx_values:
       kubernetes.io/hostname: 
     service:
       enabled: true
+      external:
+        enabled: true
       type: LoadBalancer
-      loadBalancerIP: {{ ingress_ip}}
+      loadBalancerIP: "{{ ingress_ip }}"
       externalTrafficPolicy: "Local"
     admissionWebhooks:
       enabled: false

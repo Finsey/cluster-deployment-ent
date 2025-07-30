@@ -6,7 +6,7 @@ all:
     netmask: 255.255.255.0
     interface: "eth0"             # LAN-facing interface name
     internet_interface: "wlan0"   # Internet-facing interface name
-    ingress_ip: 192.168.3.192     # IP address upon which to announce IP address
+    ingress_ip: 192.168.3.128     # IP address upon which to announce IP address. Must be a valid IP within the MetalLB IPAddressPool object
 metal:
   children:
     masters:
