@@ -3,24 +3,6 @@
   ansible.builtin.include_tasks:
     file: prerequisites.yaml
 
-- name: Render values ({{ item.name }})
-  kubernetes.core.helm_teplate:
-    chart_ref: "{{ item.chart_ref }}"
-    chart_version: "{{ item.version }}"
-    release_values: "{{ item.release_values | default({}) }}"
-  register: rendered_values
-  when: item.release_values is defined
-
-# - name: Check if pre-configuration file exists
-#   ansible.builtin.stat:
-#     path: "../tasks/infra/pre/{{ item.name }}.yaml"
-#   register: pre_stat
-
-# - name: Apply pre-configurations ({{ item.name }})
-#   ansible.builtin.include_tasks:
-#     file: "../tasks/infra/pre/{{ item.name }}.yaml"
-#   when: pre_stat.stat.exists
-
 - name: Include pre-configurations only if file exists
   ansible.builtin.include_tasks:
     file: "{{ file }}"
@@ -32,14 +14,17 @@
       skip: true
 
 - name: Install release ({{ item.name }})
-  community.kubernetes.helm:
+  kubernetes.core.helm:
     name: "{{ item.name }}"
     chart_ref: "{{ item.chart_ref }}"
     chart_version: "{{ item.version }}"
     release_namespace: "{{ item.namespace }}"
     create_namespace: false
     chart_repo_url: "{{ item.repo_url }}"
-    values: "{{ rendered_values }}"
+    values: {{ item.release_values | default({}) }}
+    # {% if item.release_values | length > 0 %}
+    #       {{ item.release_values | to_nice_yaml(indent=2) | indent(4) }}
+    # {% endif %}
     wait: true
 
 - name: Include post-configurations only if file exists
