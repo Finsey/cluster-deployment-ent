@@ -30,3 +30,11 @@
     nameservers:
       - 8.8.8.8
       - 1.1.1.1
+
+- name: Start DNS server
+  hosts: mn0
+  gather_facts: false
+  roles:
+    - dns
+  vars:
+    gateway: "{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"

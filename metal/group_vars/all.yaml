@@ -6,6 +6,11 @@ dns_server: "8.8.8.8"
 ip_forwarding: true                 # set to true if internet-forwarding is required from the DA
 static_gateway: "192.168.3.254"     #  used if internet-forwarding is not required from the DA
 
+# Ingress
+# Domain
+dc_1: "mcginn"
+dc_2: "home"
+
 # RKE2
 rke2_version: v1.33.1+rke2r1
 rke2_cni: calico

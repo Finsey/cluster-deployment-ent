@@ -1,0 +1,63 @@
+- name: Enable dnf-plugins-core
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+
+- name: Add Docker CE repository
+  ansible.builtin.yum_repository:
+    name: docker-ce
+    description: Docker CE Stable - $basearch
+    baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
+    gpgcheck: true
+    gpgkey: https://download.docker.com/linux/fedora/gpg
+    enabled: true
+
+- name: Install Docker
+  ansible.builtin.dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Ensure Docker is running
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Get Docker info
+  docker_host_info: {}
+  register: docker_info_result
+
+- name: Create the `/etc/docker-tasks/dnsmasq` directory
+  ansible.builtin.file:
+    path: "/etc/docker-tasks/dnsmasq"
+    state: directory
+    mode: '0755'
+
+- name: Generate docker-compose config
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "/etc/docker-tasks/docker-compose.yml"
+    mode: 0644
+
+- name: Generate dnsmasq config
+  ansible.builtin.template:
+    src: dnsmasq.conf.j2
+    dest: "/etc/docker-tasks/dnsmasq/dnsmasq.conf"
+    mode: 0644
+
+- name: Generate Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "/etc/docker-tasks/dnsmasq/Dockerfile"
+    mode: 0644
+
+- name: Start the DNS server
+  community.docker.docker_compose_v2:
+    project_src: "/etc/docker-tasks"
+    state: present
+    build: always

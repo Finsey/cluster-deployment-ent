@@ -1,0 +1,21 @@
+# dnsmasq.conf
+# log dns queries
+log-queries
+domain-needed
+bogus-priv
+no-resolv
+
+# Domain records
+address=/.{{ dc_1 }}.{{ dc_2 }}/{{ gateway }}
+
+# Configure cache
+cache-size=500
+
+# Listen on all interfaces
+# interface=eth0
+listen-address=0.0.0.0
+bind-interfaces
+
+# Set DNS forwarders
+server=8.8.8.8
+server=8.8.4.4
