@@ -3,7 +3,7 @@
 env ?= prod
 export KUBECONFIG = $HOME/.kube/config
 
-default: dns deps boot cluster
+default: deps boot dns cluster
 
 ~/.ssh/id_ed25519:
 	ssh-keygen -t ed25519 -P '' -f "$@"
