@@ -10,28 +10,24 @@
   iptables:
     table: nat
     chain: POSTROUTING
-    source: "{{ host_network }}"
     out_interface: "{{ internet_interface }}"
     jump: MASQUERADE
     state: present
 
 - name: Allow forwarding LAN → WAN
   iptables:
-    table: filter
+    # table: filter
     chain: FORWARD
-    in_interface: "{{ interface }}"
     out_interface: "{{ internet_interface }}"
     source: "{{ host_network }}"
     jump: ACCEPT
     state: present
 
-- name: Allow forwarding WAN → LAN for established connections
+- name: Input rules for LAN → WAN
   iptables:
-    table: filter
-    chain: FORWARD
-    in_interface: "{{ internet_interface }}"
-    out_interface: "{{ interface }}"
-    ctstate: RELATED,ESTABLISHED
+    # table: filter
+    chain: INPUT
+    source: "{{ host_network }}"
     jump: ACCEPT
     state: present
 
