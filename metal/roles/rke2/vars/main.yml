@@ -21,7 +21,7 @@ rke2_ingress_nginx_values:
         effect: "NoSchedule"
     nodeSelector:
       kubernetes.io/os: linux
-      kubernetes.io/hostname: 
+      kubernetes.io/hostname: mn0
     service:
       enabled: true
       external:
@@ -43,4 +43,4 @@ rke2_ingress_nginx_values:
         effect: "NoSchedule"
     nodeSelector:
       kubernetes.io/os: linux
-      kubernetes.io/hostname: home-cluster-control-plane
+      kubernetes.io/hostname: mn0
