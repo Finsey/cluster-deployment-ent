@@ -1,3 +1,3 @@
-subnet    = "192.168.1.0/24"
-gateway   = "192.168.1.254"
+subnet    = "192.168.3.0/24"
+gateway   = "192.168.3.254"
 interface = "WiFi"

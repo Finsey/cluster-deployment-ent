@@ -3,7 +3,7 @@ services:
     build: ./dnsmasq
     user: root
     volumes:
-      - ./etc/dnsmasq.conf:/etc/dnsmasq.conf
+      - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
     network_mode: host
     ports:
       - "53:53/udp"

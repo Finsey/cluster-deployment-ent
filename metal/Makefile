@@ -3,7 +3,7 @@
 env ?= prod
 export KUBECONFIG = $HOME/.kube/config
 
-default: deps boot cluster
+default: dns deps boot cluster
 
 ~/.ssh/id_ed25519:
 	ssh-keygen -t ed25519 -P '' -f "$@"
@@ -16,6 +16,11 @@ boot: ~/.ssh/id_ed25519
 	ansible-playbook \
 		--inventory inventories/${env}.yaml \
 		boot.yaml
+
+dns:
+	cd terraform && terraform init
+	cd terraform && terraform plan -out=plan.tfplan
+	cd terraform && terraform apply plan.tfplan
 
 cluster:
 	ansible-playbook \
