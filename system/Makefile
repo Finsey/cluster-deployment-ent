@@ -1,7 +1,8 @@
 .POSIX:
 
-export KUBECONFIG = $HOME/.kube/config
-export K8S_AUTH_KUBECONFIG = $(KUBECONFIG)
+KUBECONFIG = $HOME/.kube/config
+KUBE_CONFIG_PATH = $(KUBECONFIG)
+K8S_AUTH_KUBECONFIG = $(KUBECONFIG)
 
 # .PHONY: install
 default: deps install

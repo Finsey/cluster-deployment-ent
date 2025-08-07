@@ -7,9 +7,6 @@
   hosts: localhost
   roles:
     - pxe_server
-  vars:
-    cluster_if: "{{ interface }}"
-    internet_if: "{{ internet_interface }}"
 
 - name: Enable iptables masquerading
   hosts: localhost
@@ -28,5 +25,12 @@
   vars:
     gateway: "{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"
     nameservers:
-      - 8.8.8.8
-      - 1.1.1.1
+      - 192.168.3.10
+
+# - name: Start DNS server
+#   hosts: localhost
+#   gather_facts: false
+#   roles:
+#     - dns
+#   vars:
+#     gateway: "{{ ip_forwarding | bool | ternary(host_address, static_gateway) }}"

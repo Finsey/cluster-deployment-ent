@@ -21,9 +21,13 @@ rke2_ingress_nginx_values:
         effect: "NoSchedule"
     nodeSelector:
       kubernetes.io/os: linux
-      kubernetes.io/hostname: 
+      kubernetes.io/hostname: mn0
     service:
-      loadBalancerIP:
+      enabled: true
+      external:
+        enabled: true
+      type: LoadBalancer
+      loadBalancerIP: "{{ ingress_ip }}"
       externalTrafficPolicy: "Local"
     admissionWebhooks:
       enabled: false
@@ -39,4 +43,4 @@ rke2_ingress_nginx_values:
         effect: "NoSchedule"
     nodeSelector:
       kubernetes.io/os: linux
-      kubernetes.io/hostname: home-cluster-control-plane
+      kubernetes.io/hostname: mn0
