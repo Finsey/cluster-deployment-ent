@@ -1,3 +1,41 @@
+- name: Create (or update) bridge interface
+  community.general.nmcli:
+    conn_name: "{{ bridge_name }}"
+    ifname: "{{ bridge_name }}"
+    type: bridge
+    method4: manual
+    ip4: "{{ host_address }}/24"
+    routes4: "{{ host_network }}"
+    autoconnect: true
+    state: present
+
+- name: Attach each cluster interface as a slave of {{ bridge_name }}
+  community.general.nmcli:
+    conn_name: "{{ item }}-to-{{ bridge_name }}"
+    ifname: "{{ item }}"
+    type: ethernet
+    slave_type: bridge
+    master: "{{ bridge_name }}"
+    state: present
+    autoconnect: true
+  loop: "{{ groups['masters'] | map(attribute='network_interface') | list }}"
+
+- name: Bring the {{ bridge_name }} interface up
+  community.general.nmcli:
+    conn_name: "{{ bridge_name }}"
+    state: up
+
+- name: Bring the slave interfaces up
+  community.general.nmcli:
+    conn_name: "{{ item }}-to-{{ bridge_name }}"
+    state: up
+  loop: "{{ groups['masters'] | map(attribute='network_interface') | list }}"
+
+- name: Bring the Internet-facing interface up
+  community.general.nmcli:
+    conn_name: "{{ internet_interface }}"
+    state: up
+
 - name: Enable IPv4 forwarding
   sysctl:
     name: net.ipv4.ip_forward
@@ -31,7 +69,7 @@
     jump: ACCEPT
     state: present
 
-- name: Ensure Docker‑USER chain does not block us
+- name: Ensure Docker‑USER chain does not block traffic
   iptables:
     table: filter
     chain: DOCKER-USER
