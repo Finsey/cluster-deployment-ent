@@ -1,3 +1,9 @@
+- name: Start NetworkManager
+  ansible.builtin.service:
+    name: NetworkManager
+    state: started
+    enabled: true
+
 - name: Create (or update) bridge interface
   community.general.nmcli:
     conn_name: "{{ bridge_name }}"
@@ -16,25 +22,32 @@
     type: ethernet
     slave_type: bridge
     master: "{{ bridge_name }}"
+    ip4: ""
+    gw4: ""
+    method4: disabled
     state: present
     autoconnect: true
-  loop: "{{ groups['masters'] | map(attribute='network_interface') | list }}"
+  loop: "{{ groups['masters'] | map('extract', hostvars, 'network_interface') | list }}"
 
-- name: Bring the {{ bridge_name }} interface up
-  community.general.nmcli:
-    conn_name: "{{ bridge_name }}"
-    state: up
+# - name: Bring the {{ bridge_name }} interface up
+#   community.general.nmcli:
+#     conn_name: "{{ bridge_name }}"
+#     state: present
 
-- name: Bring the slave interfaces up
-  community.general.nmcli:
-    conn_name: "{{ item }}-to-{{ bridge_name }}"
-    state: up
-  loop: "{{ groups['masters'] | map(attribute='network_interface') | list }}"
+# - name: Bring the slave interfaces up
+#   community.general.nmcli:
+#     conn_name: "{{ item }}-to-{{ bridge_name }}"
+#     state: present
+#   loop: "{{ groups['masters'] | map('extract', hostvars, 'network_interface') | list }}"
 
-- name: Bring the Internet-facing interface up
-  community.general.nmcli:
-    conn_name: "{{ internet_interface }}"
-    state: up
+# - name: Bring the Internet-facing interface up
+#   community.general.nmcli:
+#     conn_name: 
+#     conn_name: "{{ internet_interface }}"
+#     type: "{{ internet_type }}"
+#     state: present
+
+# - name: Bring the Internet-facing interface up (Ethernet)
 
 - name: Enable IPv4 forwarding
   sysctl:
