@@ -26,6 +26,7 @@
     #       {{ item.release_values | to_nice_yaml(indent=2) | indent(4) }}
     # {% endif %}
     wait: true
+    atomic: true
 
 - name: Include post-configurations only if file exists
   ansible.builtin.include_tasks:
