@@ -1,11 +1,4 @@
 helm_charts:
-  # - name: cert-manager
-  #   version: "v1.16.2"
-  #   repo_url: "https://charts.jetstack.io"
-  #   repo_name: "jetstack"
-  #   chart_ref: "cert-manager"
-  #   namespace: "cert-manager"
-
   - name: monitoring
     version: "71.2.0"
     repo_url: "https://prometheus-community.github.io/helm-charts"
@@ -40,6 +33,251 @@ helm_charts:
     repo_name: "metallb"
     chart_ref: "metallb"
     namespace: "metallb-system"
+    release_values:
+      prometheus:
+        serviceMonitor:
+          enabled: true
+        prometheusRule:
+          enabled: true
+
+  - name: longhorn
+    version: "1.8.1"
+    repo_url: "https://charts.longhorn.io"
+    repo_name: "longhorn"
+    chart_ref: "longhorn"
+    namespace: "longhorn-system"
+    release_values:
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        host: longhorn.{{ dc_1 }}.{{ dc_2 }}
+        pathType: Prefix
+        annotations:
+          kubernetes.io/ingress.class: nginx
+      serviceMonitor:
+        enabled: true
+
+  - name: cert-manager
+    version: "v1.16.2"
+    repo_url: "https://charts.jetstack.io"
+    repo_name: "jetstack"
+    chart_ref: "cert-manager"
+    namespace: "cert-manager"
+    release_values:
+      crds:
+        enabled: true
+      prometheus:
+        serviceMonitor:
+          enabled: true
+      ingressShim:
+        defaultIssuerName: domain-issuer
+        defaultIssuerKind: ClusterIssuer
+      
+  - name: vault
+    version: "0.22.0"
+    repo_url: "https://helm.releases.hashicorp.com"
+    repo_name: "hashicorp"
+    chart_ref: "vault"
+    namespace: "vault"
+    release_values:
+      server:
+        logLevel: "warn"
+        ha:
+          enabled: true
+          replicas: 2
+          raft:
+            enabled: true
+            setNodeId: true
+            config: |
+              cluster_name = "vault-integrated-storage"
+              storage "raft" {
+                path    = "/vault/data/"
+              }
+
+              listener "tcp" {
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+                tls_disable = "true"
+              }
+
+              service_registration "kubernetes" {}
+              # ui = true
+
+              # listener "tcp" {
+              #   tls_disable = 1
+              #   address = "[::]:8200"
+              #   cluster_address = "[::]:8201"
+              #   # Enable unauthenticated metrics access (necessary for Prometheus Operator)
+              #   #telemetry {
+              #   #  unauthenticated_metrics_access = "true"
+              #   #}
+              # }
+
+              # storage "raft" {
+              #   path = "/vault/data"
+              # }
+
+              # service_registration "kubernetes" {}
+      serviceMonitor:
+        enabled: true
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: nginx
+        ingressClassName: "nginx"
+        hosts:
+          - vault.{{ dc_1 }}.{{ dc_2 }}
+
+  - name: keycloak
+    version: "24.7.1"
+    repo_url: "https://charts.bitnami.com/bitnami"
+    repo_name: "keycloak"
+    chart_ref: "keycloak"
+    namespace: "authentication"
+    release_values:
+      auth:
+        adminPassword: "password"
+      ingress:
+        enabled: true
+        ingressClassName: "nginx"
+        hostname: auth.{{ dc_1 }}.{{ dc_2 }}
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          cert-manager.io/cluster-issuer: domain-ca-issuer
+          nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: "monitoring"
+      keycloakConfigCli:
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+
+  - name: openldap
+    version: "4.3.3"
+    repo_url: "https://jp-gouin.github.io/helm-openldap/"
+    repo_name: "openldap-stack-ha"
+    chart_ref: "openldap-stack-ha"
+    namespace: "authentication"
+    release_values:
+      global:
+        ldapDomain: "dc={{ dc_1 }},dc={{ dc_2 }}"
+        adminUser: "admin"
+        adminPassword: "password"
+        configUser: "cn=admin,dc={{ dc_1 }},dc={{ dc_2 }}"
+        configPassword: "password"
+      customLdifFiles:
+        01-root.ldif: |-
+          # Root creation
+          dn: dc="{{ dc_1 }}",dc="{{ dc_2 }}"
+          objectClass: dcObject
+          objectClass: organization
+          o: McGinn, Home
+          dc: mcginn
+        
+        02-org-units.ldif: |-
+          dn: ou=People,dc="{{ dc_1 }}",dc="{{ dc_2 }}"
+          objectClass: top
+          objectClass: organizationalUnit
+          ou: People
+
+          dn: ou=Groups,dc="{{ dc_1 }}",dc="{{ dc_2 }}"
+          objectClass: top
+          objectClass: organizationalUnit
+          ou: Groups
+
+        03-default-password.ldif: |-
+          dn: ou=Policies,dc="{{ dc_1 }}",dc="{{ dc_2 }}"
+          objectClass: top
+          objectClass: organizationalUnit
+          ou: Policies
+
+          dn: cn=default,ou=policies,dc="{{ dc_1 }}",dc="{{ dc_2 }}"
+          cn: default
+          objectClass: pwdPolicy
+          objectClass: namedPolicy
+          objectClass: top
+          pwdAllowUserChange: TRUE
+          pwdAttribute: userPassword
+          pwdCheckQuality: 2
+          pwdExpireWarning: 604800
+          pwdExpire: 2592000
+          pwdFailureCountInterval: 30
+          pwdGraceAuthNLimit: 5
+          pwdInHistory: 5
+          pwdLockout: TRUE
+          pwdLockoutDuration: 900
+          pwdMaxAge: 0
+          pwdMaxFailure: 10
+          pwdMinAge: 0
+          pwdMinLength: 5
+          pwdMustChange: FALSE
+          pwdSafeModify: FALSE
+        
+        04-default-user.ldif: |-
+          dn: uid=fmcginn,ou=People,dc="{{ dc_1 }}",dc="{{ dc_2 }}"
+          objectClass: top
+          objectClass: account
+          objectClass: posixAccount
+          objectClass: shadowAccount
+          objectClass: inetOrgPerson
+          cn: Finn McGinn
+          sn: McGinn
+          givenName: Finn
+          uid: finn.mcginn
+          uidNumber: 10000
+          gidNumber: 10000
+          homeDirectory: /home/finn
+          loginShell: /bin/bash
+          mail: finn@mcginn.home
+
+          # default password
+          userPassword: Not@SecurePassw0rd
+        
+        05-users-group.ldif: |-
+          dn: cn=users,ou=Groups,dc="{{ dc_1 }}",dc="{{ dc_2 }}"
+          objectClass: top
+          objectClass: posixGroup
+          gidNumber: 10000
+          memberUid: finn.mcginn
+
+        06-hardening.ldif: |-
+          dn: olcDatabase={1}mdb,cn=config
+          changetype: modify
+          add: olcDisallows
+          olcDisallows: bind_anon
+
+          # Force logging of password checks
+          dn: olcDatabase={1}mdb,cn=config
+          changetype: modify
+          add: olcLogLevel
+          olcLogLevel: stats sync
+
+          # Make sure SSHA is the only allowed scheme
+          dn: olcDatabase={1}mdb,cn=config
+          changetype: modify
+          add: olcPasswordHash
+          olcPasswordHash: {SSHA}
+
+          # Disable the “referrals” overlay
+          dn: olcOverlay={0}memberof,olcDatabase={1}mdb,cn=config
+          changetype: modify
+          delete: olcOverlayConfig
+      ltb-passwd:
+        hosts:
+          - "ldap.{{ dc_1 }}.{{ dc_2 }}"
+      phpldapadmin:
+        enabled: true
+        ingressClassName: nginx
+        hosts:
+          - "ldap-admin.{{ dc_1 }}.{{ dc_2 }}"
 
   # - name: consul
   #   version: "1.8.0"
@@ -91,25 +329,6 @@ helm_charts:
   #       nodeSelector:
   #         kubernetes.io/os: linux
   #         kubernetes.io/hostname: home-cluster-control-plane
-
-  # - name: vault
-  #   version: "0.22.0"
-  #   repo_url: "https://helm.releases.hashicorp.com"
-  #   repo_name: "hashicorp"
-  #   chart_ref: "vault"
-  #   namespace: "vault"
-  # - name: keycloak
-  #   version: "24.7.1"
-  #   repo_url: "https://charts.bitnami.com/bitnami"
-  #   repo_name: "keycloak"
-  #   chart_ref: "keycloak"
-  #   namespace: "authentication"
-  # - name: openldap
-  #   version: ""
-  #   repo_url: "https://jp-gouin.github.io/helm-openldap/"
-  #   repo_name: "openldap-stack-ha"
-  #   chart_ref: "openldap-stack-ha"
-  #   namespace: "authentication"
   # - name: home-assistant
   #   version: "13.4.2"
   #   repo_url: "https://k8s-at-home.com/charts/"
@@ -128,17 +347,3 @@ helm_charts:
   #   repo_name: "coredns"
   #   chart_ref: "coredns"
   #   namespace: "kube-system"
-  - name: longhorn
-    version: "1.8.1"
-    repo_url: "https://charts.longhorn.io"
-    repo_name: "longhorn"
-    chart_ref: "longhorn"
-    namespace: "longhorn-system"
-    release_values:
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        host: longhorn.{{ dc_1 }}.{{ dc_2 }}
-        pathType: Prefix
-        annotations:
-          kubernetes.io/ingress.class: nginx
