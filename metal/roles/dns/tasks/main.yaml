@@ -1,0 +1,95 @@
+- name: Enable dnf-plugins-core
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+
+# - name: Stop and disable competing DNS daemon
+#   ansible.builtin.service:
+#     name: systemd-resolved
+#     state: stopped
+#     enabled: false
+
+- name: Ensure IP forwarding is enabled at runtime
+  ansible.builtin.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: true
+
+- name: Persist IP forwarding setting
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    regexp: '^net.ipv4.ip_forward'
+    line: 'net.ipv4.ip_forward = 1'
+    create: true
+
+- name: Open port 53/TCP in firewalld
+  community.general.firewalld:
+    service: dns
+    permanent: true
+    state: enabled
+    immediate: true
+
+# - name: Redirect all incoming UDP DNS traffic on internet_interface → local 53
+#   community.general.iptables:
+#     table: nat
+#     chain: PREROUTING
+#     in_interface: "{{ internet_interface }}"
+#     protocol: udp
+#     destination_port: 53
+#     jump: REDIRECT
+#     to_ports: 53
+#     state: present
+#   become: yes
+
+# - name: Redirect all incoming TCP DNS traffic on internet_interface → local 53
+#   community.general.iptables:
+#     table: nat
+#     chain: PREROUTING
+#     in_interface: "{{ internet_interface }}"
+#     protocol: tcp
+#     destination_port: 53
+#     jump: REDIRECT
+#     to_ports: 53
+#     state: present
+#   become: yes
+
+# - name: Ensure Docker is running
+#   ansible.builtin.service:
+#     name: docker
+#     state: started
+#     enabled: true
+
+# - name: Get Docker info
+#   docker_host_info: {}
+#   register: docker_info_result
+
+# - name: Create the `/etc/docker-tasks/dnsmasq` directory
+#   ansible.builtin.file:
+#     path: "/etc/docker-tasks/dnsmasq"
+#     state: directory
+#     mode: '0755'
+
+# - name: Generate docker-compose config
+#   ansible.builtin.template:
+#     src: docker-compose.yml.j2
+#     dest: "/etc/docker-tasks/docker-compose.yml"
+#     mode: 0644
+
+# - name: Generate dnsmasq config
+#   ansible.builtin.template:
+#     src: dnsmasq.conf.j2
+#     dest: "/etc/docker-tasks/dnsmasq/dnsmasq.conf"
+#     mode: 0644
+
+# - name: Generate Dockerfile
+#   ansible.builtin.template:
+#     src: Dockerfile.j2
+#     dest: "/etc/docker-tasks/dnsmasq/Dockerfile"
+#     mode: 0644
+
+# - name: Start the DNS server
+#   community.docker.docker_compose_v2:
+#     project_src: "/etc/docker-tasks"
+#     state: present
+#     build: always

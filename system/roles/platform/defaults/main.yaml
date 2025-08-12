@@ -41,6 +41,18 @@ helm_charts:
     chart_ref: "metallb"
     namespace: "metallb-system"
 
+  # - name: consul
+  #   version: "1.8.0"
+  #   repo_url: "https://helm.releases.hashicorp.com"
+  #   repo_name: "hashicorp"
+  #   chart_ref: "consul"
+  #   namespace: "consul"
+  #   release_values:
+  #     dns:
+  #       enabled: true
+  #       type: LoadBalancer
+
+
   # - name: ingress-nginx
   #   version: "4.12.1"
   #   repo_url: "https://kubernetes.github.io/ingress-nginx"

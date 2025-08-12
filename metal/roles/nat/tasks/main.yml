@@ -1,3 +1,54 @@
+- name: Start NetworkManager
+  ansible.builtin.service:
+    name: NetworkManager
+    state: started
+    enabled: true
+
+- name: Create (or update) bridge interface
+  community.general.nmcli:
+    conn_name: "{{ bridge_name }}"
+    ifname: "{{ bridge_name }}"
+    type: bridge
+    method4: manual
+    ip4: "{{ host_address }}/24"
+    routes4: "{{ host_network }}"
+    autoconnect: true
+    state: present
+
+- name: Attach each cluster interface as a slave of {{ bridge_name }}
+  community.general.nmcli:
+    conn_name: "{{ item }}-to-{{ bridge_name }}"
+    ifname: "{{ item }}"
+    type: ethernet
+    slave_type: bridge
+    master: "{{ bridge_name }}"
+    ip4: ""
+    gw4: ""
+    method4: disabled
+    state: present
+    autoconnect: true
+  loop: "{{ groups['masters'] | map('extract', hostvars, 'network_interface') | list }}"
+
+# - name: Bring the {{ bridge_name }} interface up
+#   community.general.nmcli:
+#     conn_name: "{{ bridge_name }}"
+#     state: present
+
+# - name: Bring the slave interfaces up
+#   community.general.nmcli:
+#     conn_name: "{{ item }}-to-{{ bridge_name }}"
+#     state: present
+#   loop: "{{ groups['masters'] | map('extract', hostvars, 'network_interface') | list }}"
+
+# - name: Bring the Internet-facing interface up
+#   community.general.nmcli:
+#     conn_name: 
+#     conn_name: "{{ internet_interface }}"
+#     type: "{{ internet_type }}"
+#     state: present
+
+# - name: Bring the Internet-facing interface up (Ethernet)
+
 - name: Enable IPv4 forwarding
   sysctl:
     name: net.ipv4.ip_forward
@@ -10,32 +61,28 @@
   iptables:
     table: nat
     chain: POSTROUTING
-    source: "{{ host_network }}"
     out_interface: "{{ internet_interface }}"
     jump: MASQUERADE
     state: present
 
 - name: Allow forwarding LAN → WAN
   iptables:
-    table: filter
+    # table: filter
     chain: FORWARD
-    in_interface: "{{ interface }}"
     out_interface: "{{ internet_interface }}"
     source: "{{ host_network }}"
     jump: ACCEPT
     state: present
 
-- name: Allow forwarding WAN → LAN for established connections
+- name: Input rules for LAN → WAN
   iptables:
-    table: filter
-    chain: FORWARD
-    in_interface: "{{ internet_interface }}"
-    out_interface: "{{ interface }}"
-    ctstate: RELATED,ESTABLISHED
+    # table: filter
+    chain: INPUT
+    source: "{{ host_network }}"
     jump: ACCEPT
     state: present
 
-- name: Ensure Docker‑USER chain does not block us
+- name: Ensure Docker‑USER chain does not block traffic
   iptables:
     table: filter
     chain: DOCKER-USER

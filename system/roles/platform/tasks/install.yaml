@@ -21,11 +21,12 @@
     release_namespace: "{{ item.namespace }}"
     create_namespace: false
     chart_repo_url: "{{ item.repo_url }}"
-    values: {{ item.release_values | default({}) }}
+    values: "{{ item.release_values | default({}) }}"
     # {% if item.release_values | length > 0 %}
     #       {{ item.release_values | to_nice_yaml(indent=2) | indent(4) }}
     # {% endif %}
     wait: true
+    atomic: true
 
 - name: Include post-configurations only if file exists
   ansible.builtin.include_tasks:

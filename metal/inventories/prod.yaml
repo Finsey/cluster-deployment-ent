@@ -4,8 +4,11 @@ all:
     host_network: 192.168.3.0/24
     broadcast: 192.168.3.255
     netmask: 255.255.255.0
-    interface: "eth0"             # LAN-facing interface name
+    ingress_ip: 192.168.3.128     # IP address upon which to announce IP address. Must be a valid IP within the MetalLB IPAddressPool object
+    interface: "eth0"
     internet_interface: "wlan0"   # Internet-facing interface name
+    internet_type: "wifi"         # Type of the Internet-facing interface (wifi or ethernet)
+    bridge_name: "br0"            # Name of the bridge interface
 metal:
   children:
     masters:
