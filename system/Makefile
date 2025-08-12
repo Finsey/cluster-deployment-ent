@@ -1,6 +1,6 @@
 .POSIX:
 
-KUBECONFIG = root/.kube/config
+KUBECONFIG = /root/.kube/config
 KUBE_CONFIG_PATH = $(KUBECONFIG)
 K8S_AUTH_KUBECONFIG = $(KUBECONFIG)
 
