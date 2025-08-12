@@ -14,7 +14,6 @@ dc_2: "home"
 # RKE2
 rke2_version: v1.33.1+rke2r1
 rke2_cni: calico
-rke2_cis_profile: "cis"
 rke2_download_kubeconf: true
 rke2_download_kubeconf_path: ~/.kube
 rke2_download_kubeconf_file_name: config

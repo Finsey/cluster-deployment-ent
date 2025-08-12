@@ -3,3 +3,5 @@
   roles:
     - libraries
     - platform
+  environment:
+    K8S_AUTH_KUBECONFIG: root/.kube/config
