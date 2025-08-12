@@ -1,6 +1,6 @@
 .POSIX:
 
-export KUBECONFIG = $HOME/.kube/config
+export KUBECONFIG = /root/.kube/config
 export K8S_AUTH_KUBECONFIG = $(KUBECONFIG)
 
 # .PHONY: install

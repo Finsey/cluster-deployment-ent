@@ -38,7 +38,6 @@ helm_charts:
     version: "0.14.9"
     repo_url: "https://metallb.github.io/metallb"
     repo_name: "metallb"
-    # chart_ref: "metallb/metallb"
     chart_ref: "metallb"
     namespace: "metallb-system"
 
