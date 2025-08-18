@@ -68,9 +68,6 @@ helm_charts:
     release_values:
       crds:
         enabled: true
-      prometheus:
-        serviceMonitor:
-          enabled: true
       ingressShim:
         defaultIssuerName: domain-issuer
         defaultIssuerKind: ClusterIssuer
@@ -86,7 +83,7 @@ helm_charts:
         logLevel: "warn"
         ha:
           enabled: true
-          replicas: 2
+          replicas: {{ vault_replicas }}
           raft:
             enabled: true
             setNodeId: true

@@ -15,3 +15,6 @@ dc_2: "home"
 # Certificate authority for the cluster directories
 rca_crt: "{{ playbook_dir }}/group_vars/org_ca/rca.crt"
 rca_key: "{{ playbook_dir }}/group_vars/org_ca/rca.key"
+
+# Vault
+vault_replicas: 1

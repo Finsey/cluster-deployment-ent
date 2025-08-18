@@ -106,6 +106,7 @@
   register: unseal_results
   retries: 6
   delay: 3
+  when: pod_names | length > 1
 
 - name: Unseal remaining Vault pods with each key
   kubernetes.core.k8s_exec:

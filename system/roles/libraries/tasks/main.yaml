@@ -3,6 +3,7 @@
     name: "{{ item }}"
   loop:
     - kubernetes
+    - jmespath
 
 - name: create kubectl versioned directory
   file:
