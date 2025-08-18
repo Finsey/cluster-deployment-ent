@@ -14,6 +14,9 @@ configure:
 metal:
 	make -C metal
 
+root_ca:
+	make -C root_ca
+
 system:
 	make -C system
 

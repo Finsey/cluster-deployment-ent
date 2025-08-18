@@ -40,7 +40,7 @@
         namespace: cert-manager
       spec:
         isCA: true
-        commonName: "{{ domain_name }} Intermediate CA"
+        commonName: "{{ dc_1 }}.{{ dc_2 }} Intermediate CA"
         secretName: intermediate-ca
         privateKey:
           algorithm: ECDSA
@@ -75,7 +75,7 @@
         namespace: cert-manager
       spec:
         dnsNames:
-        - "*.{{ domain_name }}"
+        - "*.{{ dc_1 }}.{{ dc_2 }}"
         secretName: domain-tls
         issuerRef:
           name: domain-ca-issuer

@@ -11,3 +11,7 @@ load_balancer_ip_pool_dynamic: 192.168.3.160/27
 # Domain
 dc_1: "mcginn"
 dc_2: "home"
+
+# Certificate authority for the cluster directories
+rca_crt: "{{ playbook_dir }}/group_vars/org_ca/rca.crt"
+rca_key: "{{ playbook_dir }}/group_vars/org_ca/rca.key"
