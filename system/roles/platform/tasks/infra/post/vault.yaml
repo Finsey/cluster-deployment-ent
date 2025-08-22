@@ -11,6 +11,25 @@
   retries: 10
   delay: 10
 
+- name: Build list of Vault server pod names
+  set_fact:
+    vault_server_pods: >-
+      {{ pod_list.resources
+         | json_query("[?spec.containers[?name=='vault']].metadata.name")
+         | sort()
+      }}
+
+- name: Show vault server pods
+  ansible.builtin.debug:
+    msg:
+      - "all pods: {{ pod_list.resources | map(attribute='metadata.name') | list }}"
+      - "vault server pods: {{ vault_server_pods }}"
+
+- name: Fail early if no Vault server pods found
+  ansible.builtin.fail:
+    msg: "No Vault server pods found (pods discovered: {{ pod_list.resources | map(attribute='metadata.name') | list }}). Are the server pods labeled correctly?"
+  when: vault_server_pods | length == 0
+
 - name: Create unseal/root key directory
   file:
     path: "{{ unseal_dir_output }}"
@@ -102,11 +121,11 @@
     pod: "{{ item }}"
     container: vault
     command: vault operator raft join http://vault-0.vault-internal:8200
-  loop: "{{ pod_names[1:] }}"
+  loop: "{{ vault_server_pods[1:] }}"
   register: unseal_results
   retries: 6
   delay: 3
-  when: pod_names | length > 1
+  when: vault_server_pods | length > 1
 
 - name: Unseal remaining Vault pods with each key
   kubernetes.core.k8s_exec:
@@ -114,7 +133,7 @@
     pod: "{{ combo[0] }}"
     container: vault
     command: vault operator unseal "{{ combo[1] }}"
-  loop: "{{ pod_names[1:] | product(unseal_keys) | list }}"
+  loop: "{{ vault_server_pods[1:] | product(unseal_keys) | list }}"
   loop_control:
     loop_var: combo
     label: "pod={{ combo[0] }} key={{ combo[1] }}"
