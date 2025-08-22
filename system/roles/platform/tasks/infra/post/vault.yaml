@@ -178,7 +178,7 @@
     namespace: vault
     pod: vault-0
     container: vault
-    command: "vault secrets enable pki -token={{ root_token }}"
+    command: "vault secrets enable pki"
 
 - name: Configure Vault CA and CRL URLs
   kubernetes.core.k8s_exec:

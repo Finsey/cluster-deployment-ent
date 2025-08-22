@@ -13,6 +13,8 @@
         tls.crt: "{{ rca_crt_b64 }}"
         tls.key: "{{ rca_key_b64 }}"
 
+- name: Create intermediate certificate for the cluster
+
 - name: Create intermediate cluster issuer
   vars:
     issuer_name: intermediate-ca-issuer

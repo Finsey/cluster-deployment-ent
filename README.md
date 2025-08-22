@@ -29,12 +29,12 @@ $ cd {{ playbook_dir }}/group_vars/org_ca
 $ openssl req -new -x509 \
     -days 3650 \ # (1)
     -extensions v3_ca \ # (2)
-    -keyout {{ playbook_dir }}/group_vars/org_ca/root.key -out {{ playbook_dir }}/group_vars/org_ca/root.crt # (3)
+    -keyout {{ playbook_dir }}/group_vars/org_ca/rca.key -out {{ playbook_dir }}/group_vars/org_ca/rca.crt # (3)
 
 Generating a RSA private key
 ......+++++
 ....+++++
-writing new private key to '{{ playbook_dir }}/group_vars/org_ca/root.key'
+writing new private key to '{{ playbook_dir }}/group_vars/org_ca/rca.key'
 Enter PEM pass phrase: # (4)
 Verifying - Enter PEM pass phrase:
 -----
@@ -51,7 +51,7 @@ Locality Name (eg, city) []:.
 Organization Name (eg, company) [Internet Widgits Pty Ltd]:Org-Name
 Organizational Unit Name (eg, section) []:.
 Common Name (e.g. server FQDN or YOUR name) []:example.local
-Email Address []:rootca@example.local
+Email Address []:rca@example.local
 ```
 
 1. The CA root certificate will last ten years
