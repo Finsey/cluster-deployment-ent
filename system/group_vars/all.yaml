@@ -13,8 +13,8 @@ dc_1: "mcginn"
 dc_2: "home"
 
 # Certificate authority for the cluster directories
-rca_crt: "{{ playbook_dir }}/group_vars/org_ca/rca.crt"
-rca_key: "{{ playbook_dir }}/group_vars/org_ca/rca.key"
+rca_crt: "{{ playbook_dir }}/group_vars/org_ca/intermediateCA/certs/ca-chain.cert.pem"
+rca_key: "{{ playbook_dir }}/group_vars/org_ca/intermediateCA/private/intermediate.key.pem"
 
 # Vault
 vault_replicas: 1

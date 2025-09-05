@@ -2,7 +2,8 @@
 default_ca = CA_default          # The default CA name
 
 [ CA_default ]                                           # Default settings for the intermediate CA
-dir               = /root/myCA/intermediateCA            # Intermediate CA directory
+# dir               = $dir/intermediateCA                  # Intermediate CA directory
+dir               = /mnt/c/Users/user/Documents/cluster-deployment-ent/system/group_vars/org_ca/intermediateCA
 certs             = $dir/certs                           # Certificates directory
 crl_dir           = $dir/crl                             # CRL directory
 new_certs_dir     = $dir/newcerts                        # New certificates directory
