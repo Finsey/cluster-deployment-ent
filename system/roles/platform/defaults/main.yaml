@@ -83,7 +83,7 @@ helm_charts:
         logLevel: "warn"
         ha:
           enabled: true
-          replicas: {{ vault_replicas }}
+          replicas: "{{ vault_replicas }}"
           raft:
             enabled: true
             setNodeId: true

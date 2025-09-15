@@ -17,4 +17,5 @@ rca_crt: "{{ playbook_dir }}/group_vars/org_ca/intermediateCA/certs/ca-chain.cer
 rca_key: "{{ playbook_dir }}/group_vars/org_ca/intermediateCA/private/intermediate.key.pem"
 
 # Vault
+unseal_dir_output: "/root/vault/unseal/"
 vault_replicas: 1
