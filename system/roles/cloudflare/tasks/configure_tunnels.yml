@@ -1,0 +1,34 @@
+- name: Define required variables for configure
+  ansible.builtin.set_fact:
+    tunnel_name: "{{ cf_tunnel.key }}"
+
+- name: Ensure required directories exist
+  ansible.builtin.file:
+    path: "{{ cf_target_dir }}"
+    state: directory
+    mode: "755"
+    group: root
+    owner: root
+  loop:
+    - "{{ cf_config_dir }}"
+    - "{{ cf_credentials_dir }}"
+  loop_control:
+    loop_var: cf_target_dir
+
+- name: Authentication file '{{ tunnel_name }}'
+  ansible.builtin.template:
+    src: tunnel.json.j2
+    dest: "{{ cf_credentials_dir }}/{{ cf_tunnel.value.tunnel_id }}.json"
+    mode: "644"
+  register: tunnel_credentials
+  no_log: true
+
+- name: Create config file for service '{{ tunnel_name }}'
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: "{{ cf_config_dir }}/{{ tunnel_name }}.yml"
+    mode: "644"
+  register: tunnel_config
+  notify:
+    - Restart systemd service
+    - Restart init-v service

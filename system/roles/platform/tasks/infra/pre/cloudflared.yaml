@@ -1,0 +1,25 @@
+- name: Create/update secret for Cloudflared credentials.json from base64 variables
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: config-json-file-secret
+        namespace: cloudflared
+      type: kubernetes.io/tls
+      data:
+        credentials.json: "{{ cf_credentials_file }}"
+
+- name: Create/update secret for Cloudflared cert.pem from base64 variables
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: cert-pem-file-secret
+        namespace: cloudflared
+      type: kubernetes.io/tls
+      data:
+        cert.pem: "{{ cf_certificate_file }}"

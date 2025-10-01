@@ -1,0 +1,15 @@
+[Unit]
+Description=cloudflared tunnel for %I
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={{ cf_install_target_dir }}/{{ cf_binary_name }} tunnel --config {{ cf_config_dir }}/%i.yml run %i
+User={{ cf_systemd_user }}
+Group={{ cf_systemd_group }}
+
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

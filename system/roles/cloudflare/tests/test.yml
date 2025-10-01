@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  remote_user: root
+  vars:
+    cf_tunnels:
+      ssh:
+        hostname: "demo.{{ dc_1 }}.{{ dc_2 }}"
+        url: https://localhost:8080
+      test:
+        ingress:
+        - hostname: "test.{{ dc_1 }}.{{ dc_2 }}"
+          service: http_status:503
+        - service: http_status:404
+  roles:
+    - ansible-role-cloudflared

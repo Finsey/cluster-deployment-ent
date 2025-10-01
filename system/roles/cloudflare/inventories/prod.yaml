@@ -1,0 +1,5 @@
+all:
+  children:
+    servers:
+      hosts:
+        host001: {ansible_host: 192.168.3.110, mac: '48:21:0b:36:cd:c8', disk: sda, network_interface: eth0}

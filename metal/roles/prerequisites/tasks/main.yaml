@@ -27,8 +27,3 @@
     name: tar
     state: present
   become: true
-
-- name: 
-
-- name: Gather facts
-  setup:

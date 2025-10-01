@@ -5,7 +5,7 @@
     - kubernetes
     - jmespath
 
-- name: create kubectl versioned directory
+- name: Create kubectl versioned directory
   file:
     path: /opt/kubectl-{{ kubectl_version }}
     state: directory

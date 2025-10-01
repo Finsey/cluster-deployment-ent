@@ -1,0 +1,72 @@
+
+{% if cf_tunnel.value.hostname is defined %}
+hostname: {{ cf_tunnel.value.hostname }}
+url: {{ cf_tunnel.value.url }}
+{% else %}
+tunnel: {{ cf_tunnel.key }}
+credentials-file: {{ cf_credentials_dir }}/{{ cf_tunnel.value.tunnel_id }}.json
+ingress:
+  {{ cf_tunnel.value.ingress | to_nice_yaml(indent=2) | indent(2) }}
+{% endif %}
+
+{% if (cf_tunnel.value.logfile | default(true)) %}
+logfile: /var/log/cloudflared_{{ cf_tunnel.key }}.log
+{% endif %}
+{% if cf_tunnel.value.autoupdate_freq is defined %}
+autoupdate-freq: {{ cf_tunnel.value.autoupdate_freq }}
+{% endif %}
+{% if cf_tunnel.value.no_autoupdate is defined %}
+no-autoupdate: {{ cf_tunnel.value.no_autoupdate }}
+{% endif %}
+{% if cf_tunnel.value.no_tls_verify is defined %}
+no-tls-verify: {{ cf_tunnel.value.no_tls_verify }}
+{% endif %}
+{% if cf_tunnel.value.origin_ca_pool is defined %}
+origin-ca-pool: {{ cf_tunnel.value.origin_ca_pool }}
+{% endif %}
+{% if cf_tunnel.value.origin_server_name is defined %}
+origin-server-name: {{ cf_tunnel.value.origin_server_name }}
+{% endif %}
+{% if cf_tunnel.value.metrics is defined %}
+metrics: {{ cf_tunnel.value.metrics }}
+{% endif %}
+{% if cf_tunnel.value.metrics_update_freq is defined %}
+metrics-update-freq: {{ cf_tunnel.value.metrics_update_freq }}
+{% endif %}
+{% if cf_tunnel.value.tag is defined %}
+tag: {{ cf_tunnel.value.tag }}
+{% endif %}
+{% if cf_tunnel.value.loglevel is defined %}
+loglevel: {{ cf_tunnel.value.loglevel }}
+{% endif %}
+{% if cf_tunnel.value.transport_loglevel is defined %}
+transport_loglevel: {{ cf_tunnel.value.transport_loglevel }}
+{% endif %}
+{% if cf_tunnel.value.protocol is defined %}
+protocol: {{ cf_tunnel.value.protocol }}
+{% endif %}
+{% if cf_tunnel.value.retries is defined %}
+retries: {{ cf_tunnel.value.retries }}
+{% endif %}
+{% if cf_tunnel.value.no_chunked_encoding is defined %}
+no-chunked-encoding: {{ cf_tunnel.value.no_chunked_encoding }}
+{% endif %}
+{% if cf_tunnel.value.edge_ip_version is defined %}
+edge-ip-version: {{ cf_tunnel.value.edge_ip_version }}
+{% endif %}
+{% if cf_tunnel.value.edge_bind_address is defined %}
+edge-bind-address: {{ cf_tunnel.value.edge_bind_address }}
+{% endif %}
+{% if cf_tunnel.value.grace_period is defined %}
+grace-period: {{ cf_tunnel.value.grace_period }}
+{% endif %}
+{% if cf_tunnel.value.region is defined %}
+region: {{ cf_tunnel.value.region }}
+{% endif %}
+{% if cf_tunnel.value.token is defined %}
+token: {{ cf_tunnel.value.token }}
+{% endif %}
+{% if (cf_tunnel.value.warp_routing | default(false)) %}
+warp-routing:
+  enabled: true
+{% endif %}

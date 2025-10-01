@@ -71,7 +71,28 @@ helm_charts:
       ingressShim:
         defaultIssuerName: domain-issuer
         defaultIssuerKind: ClusterIssuer
-      
+
+  - name: cloudflared
+    version: "2.2.1"
+    repo_url: "https://community-charts.github.io/helm-charts"
+    repo_name: "community-charts"
+    chart_ref: "cloudflared"
+    namespace: "cloudflared"
+    release_values:
+      tunnelConfig:
+        name: "{{ cf_tunnel_name }}"
+      tunnelSecrets:
+        existingConfigJsonFileSecret:
+          name: config-json-file-secret
+        existingPemFileSecret:
+          name: cert-pem-file-secret
+      ingress:
+        - hostname: "*.{{ dc_1 }}.{{ dc_2 }}"
+          service: http://rke2-ingress-nginx-controller.kube-system.svc.cluster.local:80
+        - service: http_status:404
+      replica:
+        count: 1
+
   - name: vault
     version: "0.22.0"
     repo_url: "https://helm.releases.hashicorp.com"
@@ -277,6 +298,24 @@ helm_charts:
         ingressClassName: nginx
         hosts:
           - "ldap-admin.{{ dc_1 }}.{{ dc_2 }}"
+
+  - name: homepage
+    version: "2.2.1"
+    repo_url: "https://community-charts.github.io/helm-charts"
+    repo_name: "community-charts"
+    chart_ref: "cloudflared"
+    namespace: "cloudflared"
+    release_values:
+
+  - name: wireguard
+
+      # metrics:
+      #   enabled: true
+      #   serviceMonitor:
+      #     enabled: true
+      #     namespace: "monitoring"
+      # extraArgs:
+      #   - "--no-autoupdate"
 
   # - name: consul
   #   version: "1.8.0"

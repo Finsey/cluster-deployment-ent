@@ -1,0 +1,19 @@
+---
+- name: Define required variables for configure
+  ansible.builtin.set_fact:
+    tunnel_name: "{{ item.key }}"
+    initv_pid_file: "/var/run/{{ systemd_filename }}_{{ tunnel_name }}.pid"
+    initv_log_file: "/var/log/{{ systemd_filename }}_{{ tunnel_name }}.log"
+
+- name: Install cloudflare system-v service for service '{{ tunnel_name }}'
+  ansible.builtin.template:
+    src: cloudflared.initv.j2
+    dest: "/etc/init.d/{{ systemd_filename }}-{{ tunnel_name }}"
+    owner: root
+    group: root
+    mode: "755"
+  register: service_template
+  no_log: true
+  notify:
+    - Link Stop-Script
+    - Link Start-Script
