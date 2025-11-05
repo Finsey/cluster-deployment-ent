@@ -307,7 +307,14 @@ helm_charts:
     namespace: "cloudflared"
     release_values:
 
-  - name: wireguard
+  - name: home-assistant
+    version: "13.4.2"
+    repo_url: "https://k8s-at-home.com/charts/"
+    repo_name: "k8s-at-home"
+    chart_ref: "home-assistant"
+    namespace: "apps"
+    release_values:
+      
 
       # metrics:
       #   enabled: true
@@ -367,12 +374,6 @@ helm_charts:
   #       nodeSelector:
   #         kubernetes.io/os: linux
   #         kubernetes.io/hostname: home-cluster-control-plane
-  # - name: home-assistant
-  #   version: "13.4.2"
-  #   repo_url: "https://k8s-at-home.com/charts/"
-  #   repo_name: "k8s-at-home"
-  #   chart_ref: "home-assistant"
-  #   namespace: "homeassistant"
   # - name: external-dns
   #   version: "8.8.0"
   #   repo_url: "https://charts.bitnami.com/bitnami"

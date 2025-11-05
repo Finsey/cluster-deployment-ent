@@ -173,19 +173,19 @@
 #   environment:
 #     VAULT_TOKEN: "{{ root_token }}"
 
-- name: Enable Vault PKI engine
-  kubernetes.core.k8s_exec:
-    namespace: vault
-    pod: vault-0
-    container: vault
-    command: "vault secrets enable pki"
+# - name: Enable Vault PKI engine
+#   kubernetes.core.k8s_exec:
+#     namespace: vault
+#     pod: vault-0
+#     container: vault
+#     command: "vault secrets enable pki"
 
-- name: Configure Vault CA and CRL URLs
-  kubernetes.core.k8s_exec:
-    namespace: vault
-    pod: vault-0
-    container: vault
-    command: vault write pki/config/urls issuing_certificates="https://vault.example.com/v1/pki/ca" crl_distribution_points="https://vault.example.com/v1/pki/crl" -token={{ root_token }}
+# - name: Configure Vault CA and CRL URLs
+#   kubernetes.core.k8s_exec:
+#     namespace: vault
+#     pod: vault-0
+#     container: vault
+#     command: vault write pki/config/urls issuing_certificates="https://vault.example.com/v1/pki/ca" crl_distribution_points="https://vault.example.com/v1/pki/crl" -token={{ root_token }}
 
 # Installation of PKI things
 # Installation of other things

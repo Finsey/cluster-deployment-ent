@@ -1,0 +1,13 @@
+[root@da cluster-deployment-ent]# cat ~/.ssh/id_ed25519
+
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACALQJ1++9Gj16imbzDKvnuLKt6ERtj3DrpoqTbnrLo/lwAAAJCaJnjemiZ4
+3gAAAAtzc2gtZWQyNTUxOQAAACALQJ1++9Gj16imbzDKvnuLKt6ERtj3DrpoqTbnrLo/lw
+AAAEDw4usRzVVWO4nGjlAtkqW+i1wrSBpEYLc3xR9X3rvOtQtAnX770aPXqKZvMMq+e4sq
+3oRG2PcOumipNuesuj+XAAAADHJvb3RAdnhhLW1uMwE=
+-----END OPENSSH PRIVATE KEY-----
+
+[root@da cluster-deployment-ent]# cat ~/.ssh/id_ed25519.pub
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAtAnX770aPXqKZvMMq+e4sq3oRG2PcOumipNuesuj+X root@vxa-mn3
+[root@da cluster-deployment-ent]#
